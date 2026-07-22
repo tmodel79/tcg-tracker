@@ -1,13 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { won, numParse, todayISO } from '@/lib/utils'
+import { uploadCardImage } from '@/lib/supabase'
 import { GAMES, FX_DEFAULT } from '@/types/card'
+import { CameraModal } from './CameraModal'
+import { CardVariantPicker } from './CardVariantPicker'
+import type { CardVariant } from './CardVariantPicker'
+import type { OcrResult } from './CameraModal'
 import type { Card, Currency, Game } from '@/types/card'
 
 interface CardModalProps {
   open: boolean
-  card: Card | null        // null = 신규 추가
+  card: Card | null
   onClose: () => void
   onSave: (data: Partial<Card>, isNew: boolean) => void
   onDelete: (id: string) => void
@@ -34,9 +40,11 @@ const fieldStyle: React.CSSProperties = {
 }
 
 export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalProps) {
+  // 기본 필드
   const [name, setName] = useState('')
   const [game, setGame] = useState<Game>('원피스')
   const [grade, setGrade] = useState('')
+  const [cardNumber, setCardNumber] = useState('')
   const [buyDate, setBuyDate] = useState(todayISO())
   const [buyPrice, setBuyPrice] = useState('')
   const [currency, setCurrency] = useState<Currency>('KRW')
@@ -47,13 +55,28 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
   const [currentPrice, setCurrentPrice] = useState('')
   const [err, setErr] = useState('')
 
-  // 카드 데이터로 폼 초기화
+  // 이미지
+  const [imageUrl, setImageUrl] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // 카메라
+  const [cameraOpen, setCameraOpen] = useState(false)
+
+  // 카드 ID (이미지 업로드 경로 결정용)
+  const [pendingCardId, setPendingCardId] = useState<string>('')
+
+  // 폼 초기화
   useEffect(() => {
     if (!open) return
+    const newId = card?.id ?? crypto.randomUUID()
+    setPendingCardId(newId)
+
     if (card) {
       setName(card.name)
       setGame(card.game)
       setGrade(card.grade || '')
+      setCardNumber(card.card_number || '')
       setBuyDate(card.buy_date || todayISO())
       setBuyPrice(card.buy_price ? String(card.buy_price) : '')
       setCurrency(card.currency)
@@ -62,10 +85,12 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
       setShipping(card.shipping ? String(card.shipping) : '')
       setEtcCost(card.etc_cost ? String(card.etc_cost) : '')
       setCurrentPrice(card.current_price != null ? String(card.current_price) : '')
+      setImageUrl(card.image_url || '')
     } else {
       setName('')
       setGame('원피스')
       setGrade('')
+      setCardNumber('')
       setBuyDate(todayISO())
       setBuyPrice('')
       setCurrency('KRW')
@@ -74,34 +99,74 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
       setShipping('')
       setEtcCost('')
       setCurrentPrice('')
+      setImageUrl('')
     }
     setErr('')
   }, [open, card])
 
-  // 통화 변경 시 환율 자동 세팅
   const handleCurrencyChange = (cur: Currency) => {
     setCurrency(cur)
-    if (cur === 'KRW') {
-      setFxRate('1')
-    } else {
-      setFxRate(String(FX_DEFAULT[cur]))
-    }
+    setFxRate(cur === 'KRW' ? '1' : String(FX_DEFAULT[cur]))
   }
 
-  // 총원가 실시간 계산
   const totalCost =
     numParse(buyPrice) * (numParse(fxRate) || 1) +
     numParse(customs) +
     numParse(shipping) +
     numParse(etcCost)
 
-  const handleSave = () => {
-    if (!name.trim()) {
-      setErr('카드명을 입력해 주세요.')
-      return
+  // 파일 업로드
+  const handleFileUpload = async (file: File) => {
+    try {
+      setUploading(true)
+      const url = await uploadCardImage(file, pendingCardId)
+      setImageUrl(url)
+    } catch (e: any) {
+      setErr(`이미지 업로드 실패: ${e.message}`)
+    } finally {
+      setUploading(false)
     }
+  }
+
+  // 카메라 캡처 완료
+  const handleCameraCapture = async (dataUrl: string, ocrResult?: OcrResult) => {
+    setCameraOpen(false)
+
+    // dataUrl → File 변환 후 Supabase Storage 업로드
+    try {
+      setUploading(true)
+      const blob = await (await fetch(dataUrl)).blob()
+      const file = new File([blob], `${pendingCardId}.jpg`, { type: 'image/jpeg' })
+      const url = await uploadCardImage(file, pendingCardId)
+      setImageUrl(url)
+    } catch {
+      // 업로드 실패 시 dataUrl 직접 사용 (임시)
+      setImageUrl(dataUrl)
+    } finally {
+      setUploading(false)
+    }
+
+    // OCR 결과 자동 채우기
+    if (ocrResult) {
+      if (ocrResult.name && !name) setName(ocrResult.name)
+      if (ocrResult.card_number && !cardNumber) setCardNumber(ocrResult.card_number)
+      if (ocrResult.game && GAMES.includes(ocrResult.game as Game)) setGame(ocrResult.game as Game)
+      if (ocrResult.grade && !grade) setGrade(ocrResult.grade)
+    }
+  }
+
+  // 카드 변형 선택
+  const handleVariantSelect = (variant: CardVariant) => {
+    setImageUrl(variant.image_url)
+    if (!name) setName(variant.name)
+  }
+
+  const handleSave = () => {
+    if (!name.trim()) { setErr('카드명을 입력해 주세요.'); return }
+
     const hasNow = currentPrice !== ''
     const data: Partial<Card> = {
+      ...(card ? {} : { id: pendingCardId }),
       name: name.trim(),
       game,
       grade: grade || null,
@@ -113,16 +178,13 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
       shipping: numParse(shipping),
       etc_cost: numParse(etcCost),
       current_price: hasNow ? numParse(currentPrice) : null,
+      card_number: cardNumber.trim() || null,
+      image_url: imageUrl || null,
     }
 
-    // 시세가 바뀌면 직전 시세 보관
     if (card && hasNow && card.current_price != null) {
       const newNow = numParse(currentPrice)
-      if (Number(card.current_price) !== newNow) {
-        data.prev_price = Number(card.current_price)
-      } else {
-        data.prev_price = card.prev_price
-      }
+      data.prev_price = Number(card.current_price) !== newNow ? Number(card.current_price) : card.prev_price
     }
 
     onSave(data, !card)
@@ -137,252 +199,319 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
   if (!open) return null
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(4,7,11,.72)',
-        backdropFilter: 'blur(2px)',
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        padding: '40px 16px',
-        zIndex: 50,
-        overflowY: 'auto',
-      }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
-      }}
-    >
+    <>
+      {/* 카메라 모달 */}
+      <CameraModal
+        open={cameraOpen}
+        onClose={() => setCameraOpen(false)}
+        onCapture={handleCameraCapture}
+      />
+
+      {/* 카드 등록/수정 모달 */}
       <div
-        className="modal-pop"
         style={{
-          background: 'var(--panel)',
-          border: '1px solid var(--border)',
-          borderRadius: 16,
-          width: '100%',
-          maxWidth: 540,
-          padding: '22px 22px 20px',
+          position: 'fixed', inset: 0,
+          background: 'rgba(4,7,11,.72)',
+          backdropFilter: 'blur(2px)',
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+          padding: '40px 16px', zIndex: 50, overflowY: 'auto',
         }}
-        role="dialog"
-        aria-modal="true"
+        onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
       >
-        <h2 style={{ margin: '0 0 2px', fontSize: 17, fontWeight: 800 }}>
-          {card ? '카드 수정' : '카드 추가'}
-        </h2>
-        <p style={{ color: 'var(--muted)', fontSize: 12.5, margin: '0 0 18px' }}>
-          노란 골드 숫자(총원가)는 자동으로 계산돼요. 시세만 나중에 바꿔주면 됩니다.
-        </p>
-
-        {/* 기본 정보 */}
-        <Section title="기본 정보">
-          <Field label="카드명 *">
-            <input
-              style={fieldStyle}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="예: Luffy P-033 / Heihachi Yui RP-001"
-              autoFocus
-            />
-          </Field>
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 10 }}>
-            <Field label="게임">
-              <select
-                style={fieldStyle}
-                value={game}
-                onChange={(e) => setGame(e.target.value as Game)}
-              >
-                {GAMES.map((g) => (
-                  <option key={g}>{g}</option>
-                ))}
-              </select>
-            </Field>
-            <Field label="버전 · 등급">
-              <input
-                style={fieldStyle}
-                value={grade}
-                onChange={(e) => setGrade(e.target.value)}
-                placeholder="예: PSA 10"
-              />
-            </Field>
-            <Field label="구매일">
-              <input
-                type="date"
-                style={fieldStyle}
-                value={buyDate}
-                onChange={(e) => setBuyDate(e.target.value)}
-              />
-            </Field>
-          </div>
-        </Section>
-
-        {/* 구매 금액 */}
-        <Section title="구매 금액">
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 10 }}>
-            <Field label="구매가">
-              <input
-                style={fieldStyle}
-                inputMode="decimal"
-                value={buyPrice}
-                onChange={(e) => setBuyPrice(e.target.value)}
-                placeholder="0"
-              />
-            </Field>
-            <Field label="통화">
-              <select
-                style={fieldStyle}
-                value={currency}
-                onChange={(e) => handleCurrencyChange(e.target.value as Currency)}
-              >
-                {CURRENCIES.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label={currency === 'KRW' ? '환율' : `환율 (1 ${currency} = ? 원)`}>
-              <input
-                style={fieldStyle}
-                inputMode="decimal"
-                value={fxRate}
-                onChange={(e) => setFxRate(e.target.value)}
-                disabled={currency === 'KRW'}
-                placeholder="1"
-              />
-            </Field>
-          </div>
-          <p style={{ color: 'var(--muted-2)', fontSize: 11.5, marginTop: 6, lineHeight: 1.4 }}>
-            {currency === 'KRW'
-              ? '원화 구매는 환율이 1로 고정됩니다.'
-              : `기본값은 참고용이에요. 실제 결제 시점 환율로 직접 수정하세요. (예: 1 ${currency} ≈ ${FX_DEFAULT[currency]}원)`}
-          </p>
-        </Section>
-
-        {/* 부대 비용 */}
-        <Section title="부대 비용 (원화)">
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 10 }}>
-            <Field label="관세">
-              <input style={fieldStyle} inputMode="decimal" value={customs} onChange={(e) => setCustoms(e.target.value)} placeholder="0" />
-            </Field>
-            <Field label="배송대행비">
-              <input style={fieldStyle} inputMode="decimal" value={shipping} onChange={(e) => setShipping(e.target.value)} placeholder="0" />
-            </Field>
-            <Field label="기타비용">
-              <input style={fieldStyle} inputMode="decimal" value={etcCost} onChange={(e) => setEtcCost(e.target.value)} placeholder="0" />
-            </Field>
-          </div>
-        </Section>
-
-        {/* 현재 시세 */}
-        <Section title="현재 시세 (원화)">
-          <Field label="현재가 — 지금 시세 (비워두면 손익 계산 제외)">
-            <input
-              style={fieldStyle}
-              inputMode="decimal"
-              value={currentPrice}
-              onChange={(e) => setCurrentPrice(e.target.value)}
-              placeholder="예: 1,030,000"
-            />
-          </Field>
-        </Section>
-
-        {/* 총원가 미리보기 */}
         <div
+          className="modal-pop"
           style={{
-            background: 'var(--panel-2)',
-            border: '1px dashed var(--border)',
-            borderRadius: 10,
-            padding: '11px 14px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginTop: 2,
+            background: 'var(--panel)',
+            border: '1px solid var(--border)',
+            borderRadius: 16,
+            width: '100%', maxWidth: 560,
+            padding: '22px 22px 20px',
           }}
+          role="dialog"
+          aria-modal="true"
         >
-          <span style={{ color: 'var(--muted)', fontSize: 12, fontWeight: 600 }}>
-            총원가 (자동 계산)
-          </span>
-          <span className="num" style={{ fontSize: 18, fontWeight: 800, color: 'var(--accent)' }}>
-            {won(totalCost)}
-          </span>
-        </div>
+          <h2 style={{ margin: '0 0 2px', fontSize: 17, fontWeight: 800 }}>
+            {card ? '카드 수정' : '카드 추가'}
+          </h2>
+          <p style={{ color: 'var(--muted)', fontSize: 12.5, margin: '0 0 18px' }}>
+            노란 골드 숫자(총원가)는 자동으로 계산돼요. 시세만 나중에 바꿔주면 됩니다.
+          </p>
 
-        {/* 에러 */}
-        <p style={{ color: 'var(--gain)', fontSize: 12, marginTop: 8, minHeight: 16 }}>{err}</p>
+          {/* ── 카드 이미지 섹션 ── */}
+          <Section title="카드 이미지">
+            <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+              {/* 미리보기 */}
+              <div
+                style={{
+                  flexShrink: 0,
+                  width: 90, height: 126,
+                  borderRadius: 8,
+                  border: '1px dashed var(--border)',
+                  background: 'var(--panel-2)',
+                  overflow: 'hidden',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  position: 'relative',
+                }}
+              >
+                {imageUrl ? (
+                  <>
+                    <img
+                      src={imageUrl}
+                      alt="card"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={() => setImageUrl('')}
+                    />
+                    <button
+                      onClick={() => setImageUrl('')}
+                      style={{
+                        position: 'absolute', top: 3, right: 3,
+                        background: 'rgba(0,0,0,0.65)', color: '#fff',
+                        border: 'none', borderRadius: '50%',
+                        width: 20, height: 20, fontSize: 12,
+                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}
+                    >×</button>
+                  </>
+                ) : uploading ? (
+                  <span style={{ color: 'var(--muted)', fontSize: 11 }}>업로드 중…</span>
+                ) : (
+                  <span style={{ color: 'var(--muted-2)', fontSize: 22 }}>🃏</span>
+                )}
+              </div>
 
-        {/* 버튼 */}
-        <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
-          {card && (
+              {/* 버튼들 */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {/* 파일 업로드 */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleFileUpload(file)
+                    e.target.value = ''
+                  }}
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  style={{
+                    ...btnSecondary,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  }}
+                >
+                  📁 파일 업로드
+                </button>
+
+                {/* 카메라 스캔 */}
+                <button
+                  onClick={() => setCameraOpen(true)}
+                  disabled={uploading}
+                  style={{
+                    ...btnSecondary,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  }}
+                >
+                  📸 카메라 스캔
+                </button>
+
+                {/* URL 직접 입력 */}
+                <input
+                  style={{ ...fieldStyle, fontSize: 12 }}
+                  value={imageUrl.startsWith('data:') ? '' : imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  placeholder="또는 이미지 URL 직접 입력"
+                />
+              </div>
+            </div>
+
+            {/* 카드번호 입력 → 변형 선택 */}
+            <div style={{ marginTop: 12 }}>
+              <Field label="카드번호 (입력하면 같은 번호 일러스트를 자동 검색)">
+                <input
+                  style={fieldStyle}
+                  value={cardNumber}
+                  onChange={(e) => setCardNumber(e.target.value)}
+                  placeholder="예: OP01-001, P-033, sv1-001"
+                />
+              </Field>
+              <CardVariantPicker
+                game={game}
+                cardNumber={cardNumber}
+                selectedUrl={imageUrl}
+                onSelect={handleVariantSelect}
+              />
+            </div>
+          </Section>
+
+          {/* ── 기본 정보 ── */}
+          <Section title="기본 정보">
+            <Field label="카드명 *">
+              <input
+                style={fieldStyle}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="예: Luffy P-033 / Heihachi Yui RP-001"
+                autoFocus
+              />
+            </Field>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 10 }}>
+              <Field label="게임">
+                <select style={fieldStyle} value={game} onChange={(e) => setGame(e.target.value as Game)}>
+                  {GAMES.map((g) => <option key={g}>{g}</option>)}
+                </select>
+              </Field>
+              <Field label="버전 · 등급">
+                <input
+                  style={fieldStyle}
+                  value={grade}
+                  onChange={(e) => setGrade(e.target.value)}
+                  placeholder="예: PSA 10"
+                />
+              </Field>
+              <Field label="구매일">
+                <input
+                  type="date"
+                  style={fieldStyle}
+                  value={buyDate}
+                  onChange={(e) => setBuyDate(e.target.value)}
+                />
+              </Field>
+            </div>
+          </Section>
+
+          {/* ── 구매 금액 ── */}
+          <Section title="구매 금액">
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 10 }}>
+              <Field label="구매가">
+                <input style={fieldStyle} inputMode="decimal" value={buyPrice} onChange={(e) => setBuyPrice(e.target.value)} placeholder="0" />
+              </Field>
+              <Field label="통화">
+                <select style={fieldStyle} value={currency} onChange={(e) => handleCurrencyChange(e.target.value as Currency)}>
+                  {CURRENCIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+                </select>
+              </Field>
+              <Field label={currency === 'KRW' ? '환율' : `환율 (1 ${currency} = ? 원)`}>
+                <input
+                  style={fieldStyle} inputMode="decimal" value={fxRate}
+                  onChange={(e) => setFxRate(e.target.value)}
+                  disabled={currency === 'KRW'} placeholder="1"
+                />
+              </Field>
+            </div>
+            <p style={{ color: 'var(--muted-2)', fontSize: 11.5, marginTop: 6, lineHeight: 1.4 }}>
+              {currency === 'KRW'
+                ? '원화 구매는 환율이 1로 고정됩니다.'
+                : `기본값은 참고용이에요. 실제 결제 시점 환율로 수정하세요. (예: 1 ${currency} ≈ ${FX_DEFAULT[currency]}원)`}
+            </p>
+          </Section>
+
+          {/* ── 부대 비용 ── */}
+          <Section title="부대 비용 (원화)">
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 10 }}>
+              <Field label="관세">
+                <input style={fieldStyle} inputMode="decimal" value={customs} onChange={(e) => setCustoms(e.target.value)} placeholder="0" />
+              </Field>
+              <Field label="배송대행비">
+                <input style={fieldStyle} inputMode="decimal" value={shipping} onChange={(e) => setShipping(e.target.value)} placeholder="0" />
+              </Field>
+              <Field label="기타비용">
+                <input style={fieldStyle} inputMode="decimal" value={etcCost} onChange={(e) => setEtcCost(e.target.value)} placeholder="0" />
+              </Field>
+            </div>
+          </Section>
+
+          {/* ── 현재 시세 ── */}
+          <Section title="현재 시세 (원화)">
+            <Field label="현재가 — 지금 시세 (비워두면 손익 계산 제외)">
+              <input
+                style={fieldStyle} inputMode="decimal" value={currentPrice}
+                onChange={(e) => setCurrentPrice(e.target.value)}
+                placeholder="예: 1,030,000"
+              />
+            </Field>
+          </Section>
+
+          {/* ── 총원가 미리보기 ── */}
+          <div
+            style={{
+              background: 'var(--panel-2)', border: '1px dashed var(--border)',
+              borderRadius: 10, padding: '11px 14px',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 2,
+            }}
+          >
+            <span style={{ color: 'var(--muted)', fontSize: 12, fontWeight: 600 }}>총원가 (자동 계산)</span>
+            <span className="num" style={{ fontSize: 18, fontWeight: 800, color: 'var(--accent)' }}>
+              {won(totalCost)}
+            </span>
+          </div>
+
+          {/* 에러 */}
+          <p style={{ color: 'var(--gain)', fontSize: 12, marginTop: 8, minHeight: 16 }}>{err}</p>
+
+          {/* 버튼 */}
+          <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
+            {card && (
+              <button
+                onClick={handleDelete}
+                style={{
+                  background: 'transparent', border: '1px solid #4a2730',
+                  color: 'var(--gain)', borderRadius: 9, padding: '9px 14px',
+                  fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >
+                삭제
+              </button>
+            )}
+            <span style={{ flex: 1 }} />
             <button
-              onClick={handleDelete}
+              onClick={onClose}
               style={{
-                background: 'transparent',
-                border: '1px solid #4a2730',
-                color: 'var(--gain)',
-                borderRadius: 9,
-                padding: '9px 14px',
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-                fontFamily: 'inherit',
+                background: 'var(--panel-2)', color: 'var(--text)',
+                border: '1px solid var(--border)', borderRadius: 9, padding: '9px 14px',
+                fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
               }}
             >
-              삭제
+              취소
             </button>
-          )}
-          <span style={{ flex: 1 }} />
-          <button
-            onClick={onClose}
-            style={{
-              background: 'var(--panel-2)',
-              color: 'var(--text)',
-              border: '1px solid var(--border)',
-              borderRadius: 9,
-              padding: '9px 14px',
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-            }}
-          >
-            취소
-          </button>
-          <button
-            onClick={handleSave}
-            style={{
-              background: 'var(--accent)',
-              color: 'var(--accent-ink)',
-              border: '1px solid var(--accent)',
-              borderRadius: 9,
-              padding: '9px 14px',
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-            }}
-          >
-            저장
-          </button>
+            <button
+              onClick={handleSave}
+              style={{
+                background: 'var(--accent)', color: 'var(--accent-ink)',
+                border: '1px solid var(--accent)', borderRadius: 9, padding: '9px 14px',
+                fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              저장
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
+}
+
+const btnSecondary: React.CSSProperties = {
+  background: 'var(--panel-2)',
+  border: '1px solid var(--border)',
+  color: 'var(--text)',
+  borderRadius: 9,
+  padding: '8px 12px',
+  fontSize: 13,
+  fontWeight: 600,
+  cursor: 'pointer',
+  fontFamily: 'inherit',
+  width: '100%',
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 16 }}>
-      <div
-        style={{
-          fontSize: 11.5,
-          fontWeight: 700,
-          color: 'var(--accent)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-          marginBottom: 9,
-        }}
-      >
+      <div style={{
+        fontSize: 11.5, fontWeight: 700, color: 'var(--accent)',
+        textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 9,
+      }}>
         {title}
       </div>
       {children}

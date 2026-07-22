@@ -29,6 +29,8 @@ export interface Card {
   etc_cost: number        // 기타비용(원)
   current_price: number | null  // 현재 시세(원). 없으면 null
   prev_price: number | null     // 직전 시세 (등락 표시용)
+  card_number: string | null    // 카드번호 (예: OP01-001, P-033)
+  image_url: string | null      // 카드 이미지 URL (Supabase Storage or external)
   created_at: string
   updated_at: string
 }

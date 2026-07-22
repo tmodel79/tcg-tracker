@@ -168,39 +168,86 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
         ;(e.currentTarget as HTMLElement).style.background = 'transparent'
       }}
     >
-      {/* 카드명 + 배지 */}
+      {/* 카드 썸네일 + 이름 + 배지 */}
       <td className="cardname-cell" style={{ ...tdStyle, textAlign: 'left' }}>
-        <div style={{ fontWeight: 700, fontSize: 14 }}>{card.name}</div>
-        <div style={{ color: 'var(--muted-2)', fontSize: 11.5, marginTop: 2 }}>
-          <span
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* 썸네일 */}
+          <div
             style={{
-              display: 'inline-block',
-              padding: '2px 8px',
-              borderRadius: 6,
-              fontSize: 11,
-              fontWeight: 700,
-              background: 'var(--panel-3)',
-              color: 'var(--muted)',
+              flexShrink: 0,
+              width: 38, height: 53,
+              borderRadius: 5,
+              overflow: 'hidden',
+              background: 'var(--panel-2)',
+              border: '1px solid var(--border-soft)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
-            {card.game || '기타'}
-          </span>
-          {card.grade && (
-            <span
-              style={{
-                display: 'inline-block',
-                padding: '2px 8px',
-                borderRadius: 6,
-                fontSize: 11,
-                fontWeight: 700,
-                background: 'rgba(232,177,58,.14)',
-                color: 'var(--accent)',
-                marginLeft: 4,
-              }}
-            >
-              {card.grade}
-            </span>
-          )}
+            {card.image_url ? (
+              <img
+                src={card.image_url}
+                alt={card.name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={(e) => {
+                  ;(e.currentTarget as HTMLImageElement).style.display = 'none'
+                }}
+              />
+            ) : (
+              <span style={{ fontSize: 18, opacity: 0.4 }}>🃏</span>
+            )}
+          </div>
+
+          {/* 이름 + 배지 */}
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 14 }}>{card.name}</div>
+            <div style={{ color: 'var(--muted-2)', fontSize: 11.5, marginTop: 2 }}>
+              <span
+                style={{
+                  display: 'inline-block',
+                  padding: '2px 8px',
+                  borderRadius: 6,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  background: 'var(--panel-3)',
+                  color: 'var(--muted)',
+                }}
+              >
+                {card.game || '기타'}
+              </span>
+              {card.grade && (
+                <span
+                  style={{
+                    display: 'inline-block',
+                    padding: '2px 8px',
+                    borderRadius: 6,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    background: 'rgba(232,177,58,.14)',
+                    color: 'var(--accent)',
+                    marginLeft: 4,
+                  }}
+                >
+                  {card.grade}
+                </span>
+              )}
+              {card.card_number && (
+                <span
+                  style={{
+                    display: 'inline-block',
+                    padding: '2px 8px',
+                    borderRadius: 6,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    background: 'rgba(77,157,255,.12)',
+                    color: 'var(--loss)',
+                    marginLeft: 4,
+                  }}
+                >
+                  {card.card_number}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </td>
 

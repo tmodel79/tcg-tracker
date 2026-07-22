@@ -29,8 +29,9 @@ export function useCards() {
 
   const saveCard = useCallback(
     async (data: Partial<Card>, isNew: boolean) => {
+      // isNew일 때 data에 id가 이미 있으면 그대로 사용 (이미지 업로드 경로와 일치)
       const row: Partial<Card> = isNew
-        ? { ...data, id: uid() }
+        ? { id: uid(), ...data }
         : data
       const saved = await upsertCard(row)
       setCards((prev) =>

@@ -57,6 +57,22 @@ export async function removeCard(id: string): Promise<void> {
   if (error) throw error
 }
 
+/** 카드 이미지를 Storage에 업로드하고 공개 URL 반환 */
+export async function uploadCardImage(file: File, cardId: string): Promise<string> {
+  const client = getClient()
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const path = `${cardId}.${ext}`
+
+  const { error } = await client.storage
+    .from('card-images')
+    .upload(path, file, { upsert: true, contentType: file.type })
+
+  if (error) throw error
+
+  const { data } = client.storage.from('card-images').getPublicUrl(path)
+  return data.publicUrl
+}
+
 /** JSON 백업에서 일괄 import */
 export async function importCards(cards: Card[]): Promise<void> {
   const client = getClient()
