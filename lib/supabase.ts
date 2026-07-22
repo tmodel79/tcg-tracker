@@ -37,9 +37,13 @@ export async function loadCards(): Promise<Card[]> {
 
 /** 카드 추가 또는 수정 */
 export async function upsertCard(card: Partial<Card>): Promise<Card> {
+  // user_id가 없으면 제거 (개인용 트래커 — RLS 비활성화 상태)
+  const { user_id: _uid, ...rest } = card as Card
+  const payload = _uid ? card : rest
+
   const { data, error } = await getClient()
     .from('cards')
-    .upsert(card)
+    .upsert(payload)
     .select()
     .single()
 
