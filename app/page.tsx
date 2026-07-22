@@ -5,59 +5,75 @@ import { useCards } from '@/lib/useCards'
 import { calcPortfolio } from '@/lib/calc'
 import { buildCsvBlob, downloadBlob, stamp } from '@/lib/utils'
 import { useI18n } from '@/lib/i18n'
-import { SummaryBar } from '@/components/SummaryBar'
+import { PortfolioSidebar } from '@/components/PortfolioSidebar'
 import { Controls } from '@/components/Controls'
 import { CardTable } from '@/components/CardTable'
 import { CardModal } from '@/components/CardModal'
 import { ImportModal } from '@/components/ImportModal'
-import { LangSelector } from '@/components/LangSelector'
-import { CurrencySelector } from '@/components/CurrencySelector'
-import { ThemeSelector } from '@/components/ThemeSelector'
+import { PriceSearch } from '@/components/PriceSearch'
+import { PurchaseImport } from '@/components/PurchaseImport'
 import { Toast } from '@/components/Toast'
 import type { Card, SortMode } from '@/types/card'
+import type { TabId } from '@/components/PortfolioSidebar'
+import type { CardPrefill } from '@/components/CardModal'
 
 export default function HomePage() {
   const { cards, loading, error, saveCard, deleteCard, importJson } = useCards()
   const { t } = useI18n()
 
-  // UI 상태
-  const [filterGame, setFilterGame] = useState('전체')
-  const [searchText, setSearchText] = useState('')
-  const [sortMode, setSortMode] = useState<SortMode>('pct')
+  // ── 탭 상태 ──
+  const [activeTab, setActiveTab] = useState<TabId>('collection')
 
-  // 모달 상태
-  const [cardModalOpen, setCardModalOpen] = useState(false)
+  // ── 컬렉션 탭 UI 상태 ──
+  const [filterGame, setFilterGame]   = useState('전체')
+  const [searchText, setSearchText]   = useState('')
+  const [sortMode, setSortMode]       = useState<SortMode>('pct')
+
+  // ── 모달 상태 ──
+  const [cardModalOpen, setCardModalOpen]   = useState(false)
   const [importModalOpen, setImportModalOpen] = useState(false)
-  const [editingCard, setEditingCard] = useState<Card | null>(null)
+  const [editingCard, setEditingCard]       = useState<Card | null>(null)
+  const [cardPrefill, setCardPrefill]       = useState<CardPrefill | undefined>(undefined)
 
-  // 토스트
+  // ── 토스트 ──
   const [toastMsg, setToastMsg] = useState('')
   const toast = (msg: string) => setToastMsg(msg)
 
-  // 포트폴리오 합계 (화면 계산 — DB 저장 안 함)
   const summary = calcPortfolio(cards)
 
-  // 카드 추가 버튼
+  // ── 카드 추가 (빈 폼) ──
   const handleAddClick = () => {
     setEditingCard(null)
+    setCardPrefill(undefined)
     setCardModalOpen(true)
   }
 
-  // 행 클릭 → 수정 모달
+  // ── 카드 클릭 → 수정 ──
   const handleRowClick = (id: string) => {
     const c = cards.find((x) => x.id === id)
     if (c) {
       setEditingCard(c)
+      setCardPrefill(undefined)
       setCardModalOpen(true)
     }
   }
 
-  // 저장
+  // ── 구매 가져오기 탭에서 카드 추가 ──
+  const handleImportAddCard = (prefill: CardPrefill) => {
+    setEditingCard(null)
+    setCardPrefill(prefill)
+    setCardModalOpen(true)
+    // 모달이 열리면 컬렉션 탭으로 이동
+    setActiveTab('collection')
+  }
+
+  // ── 저장 ──
   const handleSave = useCallback(
     async (data: Partial<Card>, isNew: boolean) => {
       try {
         await saveCard(data, isNew)
         setCardModalOpen(false)
+        setCardPrefill(undefined)
         toast(isNew ? t('toast_added') : t('toast_edited'))
       } catch (e) {
         toast(t('toast_save_fail', { msg: (e as Error).message }))
@@ -67,7 +83,7 @@ export default function HomePage() {
     [saveCard, t]
   )
 
-  // 삭제
+  // ── 삭제 ──
   const handleDelete = useCallback(
     async (id: string) => {
       try {
@@ -82,7 +98,7 @@ export default function HomePage() {
     [deleteCard, t]
   )
 
-  // JSON import
+  // ── JSON 가져오기 ──
   const handleImport = useCallback(
     async (imported: Card[]) => {
       try {
@@ -96,7 +112,7 @@ export default function HomePage() {
     [importJson, t]
   )
 
-  // CSV 내보내기
+  // ── CSV 내보내기 ──
   const handleCsvExport = () => {
     if (cards.length === 0) { toast(t('toast_no_export')); return }
     const blob = buildCsvBlob(cards)
@@ -104,7 +120,7 @@ export default function HomePage() {
     toast(t('toast_csv_done'))
   }
 
-  // JSON 백업
+  // ── JSON 백업 ──
   const handleJsonBackup = () => {
     if (cards.length === 0) { toast(t('toast_no_backup')); return }
     const blob = new Blob([JSON.stringify(cards, null, 2)], { type: 'application/json' })
@@ -112,19 +128,7 @@ export default function HomePage() {
     toast(t('toast_backup_done'))
   }
 
-  const btnStyle: React.CSSProperties = {
-    padding: '9px 14px',
-    borderRadius: 9,
-    fontSize: 13,
-    fontWeight: 600,
-    cursor: 'pointer',
-    fontFamily: 'inherit',
-    border: '1px solid var(--border)',
-    background: 'var(--panel-2)',
-    color: 'var(--text)',
-    transition: 'background 0.15s',
-  }
-
+  // ── 로딩 ──
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: 'var(--muted)', fontSize: 14 }}>
@@ -133,6 +137,7 @@ export default function HomePage() {
     )
   }
 
+  // ── 에러 ──
   if (error) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', flexDirection: 'column', gap: 12, color: 'var(--gain)', padding: 32 }}>
@@ -145,85 +150,115 @@ export default function HomePage() {
   }
 
   return (
-    <div style={{ maxWidth: 1120, margin: '0 auto', padding: '22px 20px 60px' }}>
-      {/* 헤더 */}
-      <div className="header-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 20 }}>
-        <div className="header-title-row" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <h1 style={{ fontSize: 19, fontWeight: 800, margin: 0, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 12px var(--accent)', display: 'inline-block' }} />
-            CardLedger
-          </h1>
-          <small className="header-sub" style={{ color: 'var(--muted)', fontSize: 12, fontWeight: 500 }}>
-            {t('app_subtitle')}
-          </small>
-          <LangSelector />
-          <CurrencySelector />
-          <ThemeSelector />
-        </div>
-        <div className="header-btns" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button className="btn-secondary" style={{ ...btnStyle, background: 'transparent', color: 'var(--muted)' }} onClick={() => setImportModalOpen(true)}>
-            {t('btn_import_json')}
-          </button>
-          <button className="btn-secondary" style={{ ...btnStyle, background: 'transparent', color: 'var(--muted)' }} onClick={handleJsonBackup}>
-            {t('btn_backup_json')}
-          </button>
-          <button className="btn-secondary" style={btnStyle} onClick={handleCsvExport}>
-            {t('btn_export_csv')}
-          </button>
-          <button
-            className="btn-primary"
-            style={{ ...btnStyle, background: 'var(--accent)', color: 'var(--accent-ink)', border: '1px solid var(--accent)' }}
-            onClick={handleAddClick}
-          >
-            {t('btn_add_card')}
-          </button>
-        </div>
-      </div>
+    <>
       <style>{`
-        @media (max-width: 560px) {
-          .header-row { flex-direction: column !important; align-items: stretch !important; gap: 10px !important; }
-          .header-title-row { justify-content: space-between; }
-          .header-sub { display: none; }
-          .header-btns { display: grid !important; grid-template-columns: 1fr 1fr 1fr !important; gap: 6px !important; }
-          .header-btns .btn-secondary { font-size: 11px !important; padding: 8px 4px !important; }
-          .header-btns .btn-primary { grid-column: 1 / -1; font-size: 14px !important; padding: 12px !important; }
+        /* ── 전체 레이아웃 ── */
+        .app-shell {
+          display: flex;
+          min-height: 100vh;
+          align-items: flex-start;
+        }
+        /* ── 메인 컨텐츠 ── */
+        .app-main {
+          flex: 1;
+          min-width: 0;
+          padding: 28px 28px 64px;
+          overflow-x: hidden;
+        }
+        @media (max-width: 860px) {
+          .app-shell { flex-direction: column; }
+          .app-main { padding: 18px 16px 60px; }
+        }
+        /* ── 컬렉션 탭: 헤더 (모바일 추가 버튼) ── */
+        .collection-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 16px;
+          gap: 10px;
+        }
+        .collection-header h2 { margin: 0; font-size: 18px; font-weight: 800; }
+        .mobile-add-btn { display: none; }
+        @media (max-width: 860px) {
+          .mobile-add-btn { display: inline-flex !important; }
         }
       `}</style>
 
-      {/* 포트폴리오 요약 */}
-      <SummaryBar summary={summary} />
+      <div className="app-shell">
+        {/* ── 좌측 사이드바 ── */}
+        <PortfolioSidebar
+          summary={summary}
+          cards={cards}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onAddClick={handleAddClick}
+          onCsvExport={handleCsvExport}
+          onJsonBackup={handleJsonBackup}
+          onImportJson={() => setImportModalOpen(true)}
+        />
 
-      {/* 컨트롤 */}
-      <Controls
-        cards={cards}
-        filterGame={filterGame}
-        sortMode={sortMode}
-        onFilterChange={setFilterGame}
-        onSearchChange={setSearchText}
-        onSortChange={setSortMode}
-      />
+        {/* ── 메인 컨텐츠 ── */}
+        <main className="app-main">
 
-      {/* 카드 표 */}
-      <CardTable
-        cards={cards}
-        filterGame={filterGame}
-        searchText={searchText}
-        sortMode={sortMode}
-        onRowClick={handleRowClick}
-        onAddClick={handleAddClick}
-      />
+          {/* ── 탭: 내 컬렉션 ── */}
+          {activeTab === 'collection' && (
+            <>
+              <div className="collection-header">
+                <h2>🃏 내 컬렉션</h2>
+                <button
+                  className="mobile-add-btn"
+                  onClick={handleAddClick}
+                  style={{
+                    display: 'none',
+                    alignItems: 'center', gap: 6,
+                    padding: '8px 14px', borderRadius: 9,
+                    fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    border: '1px solid var(--accent)',
+                    background: 'var(--accent)', color: 'var(--accent-ink)',
+                  }}
+                >
+                  + 추가
+                </button>
+              </div>
+              <Controls
+                cards={cards}
+                filterGame={filterGame}
+                sortMode={sortMode}
+                onFilterChange={setFilterGame}
+                onSearchChange={setSearchText}
+                onSortChange={setSortMode}
+              />
+              <CardTable
+                cards={cards}
+                filterGame={filterGame}
+                searchText={searchText}
+                sortMode={sortMode}
+                onRowClick={handleRowClick}
+                onAddClick={handleAddClick}
+              />
+              <div style={{ color: 'var(--muted-2)', fontSize: 11.5, textAlign: 'center', marginTop: 22, lineHeight: 1.6 }}>
+                {t('footer_note')}<br />{t('footer_tip')}
+              </div>
+            </>
+          )}
 
-      {/* 하단 안내 */}
-      <div style={{ color: 'var(--muted-2)', fontSize: 11.5, textAlign: 'center', marginTop: 22, lineHeight: 1.6 }}>
-        {t('footer_note')}<br />
-        {t('footer_tip')}
+          {/* ── 탭: 시세 검색 ── */}
+          {activeTab === 'search' && <PriceSearch />}
+
+          {/* ── 탭: 구매 가져오기 ── */}
+          {activeTab === 'import' && (
+            <PurchaseImport onAddCard={handleImportAddCard} />
+          )}
+        </main>
       </div>
 
-      {/* 모달들 */}
+      {/* ── 모달들 ── */}
       <CardModal
         open={cardModalOpen}
         card={editingCard}
-        onClose={() => setCardModalOpen(false)}
+        prefill={cardPrefill}
+        onClose={() => { setCardModalOpen(false); setCardPrefill(undefined) }}
         onSave={handleSave}
         onDelete={handleDelete}
       />
@@ -233,8 +268,8 @@ export default function HomePage() {
         onImport={handleImport}
       />
 
-      {/* 토스트 */}
+      {/* ── 토스트 ── */}
       <Toast message={toastMsg} onClear={() => setToastMsg('')} />
-    </div>
+    </>
   )
 }

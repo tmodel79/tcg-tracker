@@ -12,9 +12,23 @@ import type { CardVariant } from './CardVariantPicker'
 import type { OcrResult } from './CameraModal'
 import type { Card, Currency, Game, Language } from '@/types/card'
 
+export interface CardPrefill {
+  name?: string
+  cardNumber?: string
+  game?: Game
+  buyPrice?: string
+  currency?: Currency
+  fxRate?: string
+  customs?: string
+  shipping?: string
+  imageUrl?: string
+  language?: Language | null
+}
+
 interface CardModalProps {
   open: boolean
   card: Card | null
+  prefill?: CardPrefill
   onClose: () => void
   onSave: (data: Partial<Card>, isNew: boolean) => void
   onDelete: (id: string) => void
@@ -47,7 +61,7 @@ const fieldStyle: React.CSSProperties = {
   outline: 'none',
 }
 
-export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalProps) {
+export function CardModal({ open, card, prefill, onClose, onSave, onDelete }: CardModalProps) {
   const { t, fmt } = useI18n()
   const ex = t('ex')
 
@@ -105,6 +119,22 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
       setCurrentPrice(card.current_price != null ? String(card.current_price) : '')
       setImageUrl(card.image_url || '')
       setLanguage(card.language || null)
+    } else if (prefill) {
+      // URL / 영수증 OCR 자동 채우기
+      setName(prefill.name || '')
+      setGame(prefill.game && GAMES.includes(prefill.game) ? prefill.game : '원피스')
+      setGrade('')
+      setCardNumber(prefill.cardNumber || '')
+      setBuyDate(todayISO())
+      setBuyPrice(prefill.buyPrice || '')
+      setCurrency(prefill.currency || 'KRW')
+      setFxRate(prefill.fxRate || (prefill.currency && prefill.currency !== 'KRW' ? String(FX_DEFAULT[prefill.currency]) : '1'))
+      setCustoms(prefill.customs || '')
+      setShipping(prefill.shipping || '')
+      setEtcCost('')
+      setCurrentPrice('')
+      setImageUrl(prefill.imageUrl || '')
+      setLanguage(prefill.language ?? null)
     } else {
       setName('')
       setGame('원피스')
@@ -125,6 +155,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
     setPriceResults([])
     setPriceChecked(false)
     setPriceError('')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, card])
 
   // 시세 조회
