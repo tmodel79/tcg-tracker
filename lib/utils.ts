@@ -43,9 +43,18 @@ export const wonCompact = (n: number): string => {
  * 수익률 압축: ±999% 이상이면 ×N 배수로 표시
  * e.g. +99058.2% → "+990.6배"
  */
-// locale 파라미터는 하위 호환성 유지를 위해 보존 (실제로는 사용 안 함)
+/**
+ * 모바일용 수익률 압축 표시
+ * 10,000% 이상: 소수점 제거 ("+99058%" — 컬럼 너비 절약)
+ * 그 이하: 소수점 1자리 ("+21.2%", "+990.6%")
+ */
+// locale 파라미터는 하위 호환성 유지를 위해 보존
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const pctCompact = (n: number, locale = 'ko'): string => {
+  const abs = Math.abs(n)
+  if (abs >= 10000) {
+    return (n >= 0 ? '+' : '-') + Math.round(abs) + '%'
+  }
   return pctFmt(n)
 }
 
