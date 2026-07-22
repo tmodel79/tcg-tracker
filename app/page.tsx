@@ -12,6 +12,7 @@ import { CardModal } from '@/components/CardModal'
 import { ImportModal } from '@/components/ImportModal'
 import { LangSelector } from '@/components/LangSelector'
 import { CurrencySelector } from '@/components/CurrencySelector'
+import { ThemeSelector } from '@/components/ThemeSelector'
 import { Toast } from '@/components/Toast'
 import type { Card, SortMode } from '@/types/card'
 
@@ -157,6 +158,7 @@ export default function HomePage() {
           </small>
           <LangSelector />
           <CurrencySelector />
+          <ThemeSelector />
         </div>
         <div className="header-btns" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <button className="btn-secondary" style={{ ...btnStyle, background: 'transparent', color: 'var(--muted)' }} onClick={() => setImportModalOpen(true)}>

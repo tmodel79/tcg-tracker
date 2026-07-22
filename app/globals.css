@@ -8,7 +8,9 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* ── 다크 테마 (기본) ── */
+:root,
+[data-theme="dark"] {
   --bg: #0e1116;
   --panel: #161b22;
   --panel-2: #1b222c;
@@ -28,6 +30,34 @@
   --radius: 12px;
   --font: 'Pretendard', 'Malgun Gothic', 'Apple SD Gothic Neo', -apple-system,
     BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ── 그레이(라이트) 테마 ── */
+[data-theme="gray"] {
+  --bg: #eef0f4;
+  --panel: #ffffff;
+  --panel-2: #f4f6f9;
+  --panel-3: #e8ebef;
+  --border: #cdd3dc;
+  --border-soft: #d8dde6;
+  --text: #1a2332;
+  --muted: #566474;
+  --muted-2: #7f8e9d;
+  --gain: #c8273a;        /* 라이트 배경에서 더 진한 빨강 */
+  --loss: #1a68c0;        /* 라이트 배경에서 더 진한 파랑 */
+  --flat: #566474;
+  --accent: #b8860e;      /* 라이트 배경에서 더 진한 골드 */
+  --accent-ink: #fff8e6;
+  --gain-soft: rgba(200, 39, 58, 0.08);
+  --loss-soft: rgba(26, 104, 192, 0.08);
+  --radius: 12px;
+  --font: 'Pretendard', 'Malgun Gothic', 'Apple SD Gothic Neo', -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* 그레이 테마 전용 보정 */
+[data-theme="gray"] body {
+  background: var(--bg);
 }
 
 * {
