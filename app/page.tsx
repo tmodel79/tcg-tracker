@@ -145,8 +145,8 @@ export default function HomePage() {
   return (
     <div style={{ maxWidth: 1120, margin: '0 auto', padding: '22px 20px 60px' }}>
       {/* 헤더 */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+      <div className="header-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 20 }}>
+        <div className="header-title-row" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <h1 style={{ fontSize: 19, fontWeight: 800, margin: 0, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 12px var(--accent)', display: 'inline-block' }} />
             CardLedger
@@ -154,9 +154,9 @@ export default function HomePage() {
           <small className="header-sub" style={{ color: 'var(--muted)', fontSize: 12, fontWeight: 500 }}>
             {t('app_subtitle')}
           </small>
-        </div>
-        <div className="header-btns" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
           <LangSelector />
+        </div>
+        <div className="header-btns" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <button className="btn-secondary" style={{ ...btnStyle, background: 'transparent', color: 'var(--muted)' }} onClick={() => setImportModalOpen(true)}>
             {t('btn_import_json')}
           </button>
@@ -167,6 +167,7 @@ export default function HomePage() {
             {t('btn_export_csv')}
           </button>
           <button
+            className="btn-primary"
             style={{ ...btnStyle, background: 'var(--accent)', color: 'var(--accent-ink)', border: '1px solid var(--accent)' }}
             onClick={handleAddClick}
           >
@@ -176,10 +177,12 @@ export default function HomePage() {
       </div>
       <style>{`
         @media (max-width: 560px) {
+          .header-row { flex-direction: column !important; align-items: stretch !important; gap: 10px !important; }
+          .header-title-row { justify-content: space-between; }
           .header-sub { display: none; }
-          .header-btns { width: 100%; display: grid !important; grid-template-columns: 1fr 1fr !important; }
-          .header-btns button { font-size: 12px !important; padding: 9px 6px !important; text-align: center; }
-          .header-btns button:last-child { grid-column: 1 / -1; }
+          .header-btns { display: grid !important; grid-template-columns: 1fr 1fr 1fr !important; gap: 6px !important; }
+          .header-btns .btn-secondary { font-size: 11px !important; padding: 8px 4px !important; }
+          .header-btns .btn-primary { grid-column: 1 / -1; font-size: 14px !important; padding: 12px !important; }
         }
       `}</style>
 

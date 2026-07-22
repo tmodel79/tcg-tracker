@@ -18,6 +18,39 @@ export const wonPlain = (n: number) =>
 export const pctFmt = (n: number) =>
   (n >= 0 ? '+' : '') + n.toFixed(1) + '%'
 
+/**
+ * 숫자 → 모바일용 압축 표시
+ * 억 단위: 1,000,000,000 → "10억"
+ * 만 단위: 50,000 → "5만"
+ * 그 이하: 그대로
+ */
+export const wonCompact = (n: number): string => {
+  const v = Math.round(n || 0)
+  const abs = Math.abs(v)
+  const sign = v < 0 ? '-' : ''
+  if (abs >= 100_000_000) {
+    const uk = abs / 100_000_000
+    return sign + (uk >= 10 ? uk.toFixed(0) : uk.toFixed(1)) + '억'
+  }
+  if (abs >= 10_000) {
+    const man = abs / 10_000
+    return sign + (man >= 100 ? man.toFixed(0) : man.toFixed(1)) + '만'
+  }
+  return sign + abs.toLocaleString('ko-KR')
+}
+
+/**
+ * 수익률 압축: ±999% 이상이면 ×N 배수로 표시
+ * e.g. +99058.2% → "+990.6배"
+ */
+export const pctCompact = (n: number): string => {
+  if (Math.abs(n) >= 1000) {
+    const mul = n / 100
+    return (n >= 0 ? '+' : '') + mul.toFixed(1) + '배'
+  }
+  return pctFmt(n)
+}
+
 /** 문자열에서 숫자만 파싱 (쉼표·공백 제거) */
 export const numParse = (s: string | number | null | undefined): number => {
   const v = parseFloat(String(s ?? '').replace(/[^0-9.\-]/g, ''))

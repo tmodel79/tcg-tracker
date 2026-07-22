@@ -1,7 +1,7 @@
 'use client'
 
 import { calcCard } from '@/lib/calc'
-import { wonPlain, pctFmt } from '@/lib/utils'
+import { wonPlain, wonCompact, pctFmt, pctCompact } from '@/lib/utils'
 import { useI18n } from '@/lib/i18n'
 import type { Card, SortMode } from '@/types/card'
 
@@ -110,15 +110,25 @@ export function CardTable({
         </tbody>
       </table>
       <style>{`
+        /* 기본: 압축 숨김, 전체 표시 */
+        .num-compact, .pct-compact { display: none; }
+        .num-full, .pct-full { display: inline; }
+
         .hide-m { }
         @media (max-width: 760px) { .hide-m { display: none; } }
         .hide-s { }
-        @media (max-width: 520px) { .hide-s { display: none; } }
+
         @media (max-width: 520px) {
+          .hide-s { display: none; }
           .mobile-sub { display: block !important; }
           .card-td { padding: 10px 10px !important; }
-          .data-td { padding: 10px 10px !important; }
+          .data-td { padding: 10px 10px !important; font-size: 13px; }
+
+          /* 압축 숫자 사용 */
+          .num-full, .pct-full { display: none !important; }
+          .num-compact, .pct-compact { display: inline !important; }
         }
+
         tbody tr:last-child td { border-bottom: none !important; }
       `}</style>
     </div>
@@ -258,12 +268,12 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
                 </span>
               )}
             </div>
-            {/* 모바일 전용: 투자금 · 손익 인라인 표시 */}
+            {/* 모바일 전용: 투자금 · 손익 인라인 압축 표시 */}
             <div className="mobile-sub" style={{ display: 'none', marginTop: 5, fontSize: 11.5, color: 'var(--muted)' }}>
-              <span>{t('mobile_invest')} {wonPlain(k.totalCost)}</span>
+              <span>{t('mobile_invest')} {wonCompact(k.totalCost)}</span>
               {k.hasNow && (
                 <span className={`num ${dir}`} style={{ marginLeft: 8, fontWeight: 700 }}>
-                  {k.pnl >= 0 ? '+' : ''}{wonPlain(k.pnl)}
+                  {k.pnl >= 0 ? '+' : ''}{wonCompact(k.pnl)}
                 </span>
               )}
             </div>
@@ -281,21 +291,24 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
 
       {/* 총원가 */}
       <td className="num hide-s data-td" style={tdStyle}>
-        {wonPlain(k.totalCost)}
+        <span className="num-full">{wonPlain(k.totalCost)}</span>
+        <span className="num-compact">{wonCompact(k.totalCost)}</span>
       </td>
 
       {/* 현재가 + 직전대비 */}
       <td className="data-td" style={tdStyle}>
         {k.hasNow ? (
           <>
-            <span className="num">{wonPlain(k.now!)}</span>
+            <span className="num num-full">{wonPlain(k.now!)}</span>
+            <span className="num num-compact">{wonCompact(k.now!)}</span>
             {k.delta != null && k.delta !== 0 && (
               <div
                 className={`num ${k.delta > 0 ? 'up' : 'down'}`}
                 style={{ fontSize: 11, marginTop: 2 }}
               >
                 <span style={{ fontSize: 10 }}>{k.delta > 0 ? '▲' : '▼'}</span>{' '}
-                {wonPlain(Math.abs(k.delta))}
+                <span className="num-full">{wonPlain(Math.abs(k.delta))}</span>
+                <span className="num-compact">{wonCompact(Math.abs(k.delta))}</span>
               </div>
             )}
           </>
@@ -309,7 +322,8 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
         {k.hasNow ? (
           <span className={`num ${dir}`}>
             {k.pnl >= 0 ? '+' : ''}
-            {wonPlain(k.pnl)}
+            <span className="num-full">{wonPlain(k.pnl)}</span>
+            <span className="num-compact">{wonCompact(k.pnl)}</span>
           </span>
         ) : (
           <span style={{ color: 'var(--muted-2)', fontSize: 12 }}>—</span>
@@ -319,7 +333,10 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
       {/* 수익률 */}
       <td className="data-td" style={{ ...tdStyle, fontWeight: 800 }}>
         {k.hasNow ? (
-          <span className={`num ${dir}`}>{pctFmt(k.pct)}</span>
+          <span className={`num ${dir}`}>
+            <span className="pct-full">{pctFmt(k.pct)}</span>
+            <span className="pct-compact">{pctCompact(k.pct)}</span>
+          </span>
         ) : (
           <span style={{ color: 'var(--muted-2)', fontSize: 12 }}>—</span>
         )}

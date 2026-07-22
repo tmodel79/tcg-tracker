@@ -1,6 +1,6 @@
 'use client'
 
-import { wonPlain, pctFmt } from '@/lib/utils'
+import { wonCompact, pctCompact } from '@/lib/utils'
 import { useI18n } from '@/lib/i18n'
 import type { PortfolioSummary } from '@/types/card'
 
@@ -29,14 +29,14 @@ export function SummaryBar({ summary }: SummaryBarProps) {
         {/* 총 투자금 */}
         <StatCard>
           <div className="lbl">{t('summary_invest')}</div>
-          <div className="val num">{wonPlain(invest)}</div>
+          <div className="val num">{wonCompact(invest)}</div>
           <div className="sub">{t('summary_cards', { n: totalCards })}</div>
         </StatCard>
 
         {/* 총 평가액 */}
         <StatCard>
           <div className="lbl">{t('summary_value')}</div>
-          <div className="val num">{wonPlain(value)}</div>
+          <div className="val num">{wonCompact(value)}</div>
           <div className="sub">
             {t('summary_priced', { n: pricedCards, total: totalCards })}
           </div>
@@ -48,7 +48,7 @@ export function SummaryBar({ summary }: SummaryBarProps) {
           <div className="lbl">{t('summary_pnl')}</div>
           <div className={`val num ${dir}`}>
             {pnl >= 0 ? '+' : ''}
-            {wonPlain(pnl)}
+            {wonCompact(pnl)}
           </div>
           <div className="sub">{t('summary_pnl_desc')}</div>
         </StatCard>
@@ -57,7 +57,7 @@ export function SummaryBar({ summary }: SummaryBarProps) {
         <StatCard className={bgClass}>
           <span className="streak" />
           <div className="lbl">{t('summary_pct')}</div>
-          <div className={`val num ${dir}`}>{pctFmt(pct)}</div>
+          <div className={`val num ${dir}`}>{pctCompact(pct)}</div>
           <div className="sub">
             {dir === 'up'
               ? t('summary_profit')
