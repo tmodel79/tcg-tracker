@@ -202,10 +202,14 @@ export function PortfolioSidebar({
 
           {/* ── 로고 + 설정 ── */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h1 style={{
-              margin: 0, fontSize: 15, fontWeight: 800, letterSpacing: '-0.02em',
-              display: 'flex', alignItems: 'center', gap: 7,
-            }}>
+            <h1
+              onClick={() => onTabChange('collection')}
+              style={{
+                margin: 0, fontSize: 15, fontWeight: 800, letterSpacing: '-0.02em',
+                display: 'flex', alignItems: 'center', gap: 7,
+                cursor: 'pointer', userSelect: 'none',
+              }}
+            >
               <span style={{
                 width: 7, height: 7, borderRadius: '50%',
                 background: 'var(--accent)', boxShadow: '0 0 10px var(--accent)',
