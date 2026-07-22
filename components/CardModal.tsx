@@ -8,6 +8,7 @@ import { GAMES, FX_DEFAULT } from '@/types/card'
 import { useI18n } from '@/lib/i18n'
 import { CameraModal } from './CameraModal'
 import { CardVariantPicker } from './CardVariantPicker'
+import { CardPriceChart } from './CardPriceChart'
 import type { CardVariant } from './CardVariantPicker'
 import type { OcrResult } from './CameraModal'
 import type { Card, Currency, Game, Language } from '@/types/card'
@@ -672,6 +673,13 @@ export function CardModal({ open, card, prefill, onClose, onSave, onDelete }: Ca
               </div>
             )}
           </Section>
+
+          {/* ── 시세 히스토리 차트 (수정 모드만) ── */}
+          {card && (
+            <div style={{ marginTop: 16, marginBottom: 4 }}>
+              <CardPriceChart cardId={card.id} totalCostKrw={totalCost} />
+            </div>
+          )}
 
           {/* ── 총원가 미리보기 ── */}
           <div

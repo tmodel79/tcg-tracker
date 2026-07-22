@@ -8,6 +8,7 @@ import { CurrencySelector } from './CurrencySelector'
 import { ThemeSelector } from './ThemeSelector'
 import type { Card, PortfolioSummary } from '@/types/card'
 import { GAMES } from '@/types/card'
+import { PortfolioChart } from './PortfolioChart'
 
 const GAME_COLORS: Record<string, string> = {
   '원피스': '#e84040',
@@ -251,6 +252,11 @@ export function PortfolioSidebar({
                 </span>
               </StatItem>
             </div>
+          </div>
+
+          {/* ── 포트폴리오 가치 차트 ── */}
+          <div className="ps-desktop-only">
+            <PortfolioChart cards={cards} />
           </div>
 
           {/* ── 게임별 투자 ── */}
