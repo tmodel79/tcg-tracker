@@ -2,6 +2,7 @@
 
 import { calcCard } from '@/lib/calc'
 import { wonPlain, pctFmt } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n'
 import type { Card, SortMode } from '@/types/card'
 
 interface CardTableProps {
@@ -21,6 +22,8 @@ export function CardTable({
   onRowClick,
   onAddClick,
 }: CardTableProps) {
+  const { t } = useI18n()
+
   // 필터 → 검색 → 정렬
   let list = cards.slice()
   if (filterGame !== '전체') list = list.filter((c) => c.game === filterGame)
@@ -56,9 +59,9 @@ export function CardTable({
       >
         <div style={{ padding: '56px 24px', textAlign: 'center' }}>
           <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.7 }}>🃏</div>
-          <h3 style={{ margin: '0 0 6px', fontSize: 16 }}>아직 등록한 카드가 없어요</h3>
+          <h3 style={{ margin: '0 0 6px', fontSize: 16 }}>{t('table_empty_title')}</h3>
           <p style={{ color: 'var(--muted)', margin: '0 0 18px', fontSize: 13.5 }}>
-            첫 카드를 추가하면 총원가·손익·수익률이 여기에 주식창처럼 나옵니다.
+            {t('table_empty_desc')}
           </p>
           <button
             onClick={onAddClick}
@@ -73,7 +76,7 @@ export function CardTable({
               cursor: 'pointer',
             }}
           >
-            + 첫 카드 추가하기
+            {t('table_empty_btn')}
           </button>
         </div>
       </div>
@@ -92,12 +95,12 @@ export function CardTable({
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
-            <Th left>카드</Th>
-            <Th className="hide-m">구매일</Th>
-            <Th className="hide-s">총원가</Th>
-            <Th>현재가</Th>
-            <Th className="hide-s">손익</Th>
-            <Th>수익률</Th>
+            <Th left>{t('col_card')}</Th>
+            <Th className="hide-m">{t('col_date')}</Th>
+            <Th className="hide-s">{t('col_cost')}</Th>
+            <Th>{t('col_price')}</Th>
+            <Th className="hide-s">{t('col_pnl')}</Th>
+            <Th>{t('col_pct')}</Th>
           </tr>
         </thead>
         <tbody>
@@ -152,6 +155,7 @@ function Th({
 }
 
 function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
+  const { t } = useI18n()
   const k = calcCard(card)
   const dir = !k.hasNow ? 'flat' : k.pnl > 0 ? 'up' : k.pnl < 0 ? 'down' : 'flat'
   const rowCls = !k.hasNow ? 'r-flat' : k.pnl > 0 ? 'r-up' : k.pnl < 0 ? 'r-down' : 'r-flat'
@@ -256,7 +260,7 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
             </div>
             {/* 모바일 전용: 투자금 · 손익 인라인 표시 */}
             <div className="mobile-sub" style={{ display: 'none', marginTop: 5, fontSize: 11.5, color: 'var(--muted)' }}>
-              <span>투자 {wonPlain(k.totalCost)}</span>
+              <span>{t('mobile_invest')} {wonPlain(k.totalCost)}</span>
               {k.hasNow && (
                 <span className={`num ${dir}`} style={{ marginLeft: 8, fontWeight: 700 }}>
                   {k.pnl >= 0 ? '+' : ''}{wonPlain(k.pnl)}
@@ -296,7 +300,7 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
             )}
           </>
         ) : (
-          <span style={{ color: 'var(--muted-2)', fontSize: 12 }}>시세 입력</span>
+          <span style={{ color: 'var(--muted-2)', fontSize: 12 }}>{t('price_input')}</span>
         )}
       </td>
 

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { won, numParse, todayISO } from '@/lib/utils'
 import { uploadCardImage } from '@/lib/supabase'
 import { GAMES, FX_DEFAULT } from '@/types/card'
+import { useI18n } from '@/lib/i18n'
 import { CameraModal } from './CameraModal'
 import { CardVariantPicker } from './CardVariantPicker'
 import type { CardVariant } from './CardVariantPicker'
@@ -40,6 +41,8 @@ const fieldStyle: React.CSSProperties = {
 }
 
 export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalProps) {
+  const { t } = useI18n()
+
   // 기본 필드
   const [name, setName] = useState('')
   const [game, setGame] = useState<Game>('원피스')
@@ -162,7 +165,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
   }
 
   const handleSave = () => {
-    if (!name.trim()) { setErr('카드명을 입력해 주세요.'); return }
+    if (!name.trim()) { setErr(t('err_name_required')); return }
 
     const hasNow = currentPrice !== ''
     const data: Partial<Card> = {
@@ -192,7 +195,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
 
   const handleDelete = () => {
     if (!card) return
-    if (!confirm('이 카드를 삭제할까요? 되돌릴 수 없어요.')) return
+    if (!confirm(t('confirm_delete'))) return
     onDelete(card.id)
   }
 
@@ -231,14 +234,14 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
           aria-modal="true"
         >
           <h2 style={{ margin: '0 0 2px', fontSize: 17, fontWeight: 800 }}>
-            {card ? '카드 수정' : '카드 추가'}
+            {card ? t('modal_edit_title') : t('modal_add_title')}
           </h2>
           <p style={{ color: 'var(--muted)', fontSize: 12.5, margin: '0 0 18px' }}>
-            노란 골드 숫자(총원가)는 자동으로 계산돼요. 시세만 나중에 바꿔주면 됩니다.
+            {t('modal_subtitle')}
           </p>
 
           {/* ── 카드 이미지 섹션 ── */}
-          <Section title="카드 이미지">
+          <Section title={t('sec_image')}>
             <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
               {/* 미리보기 */}
               <div
@@ -273,7 +276,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
                     >×</button>
                   </>
                 ) : uploading ? (
-                  <span style={{ color: 'var(--muted)', fontSize: 11 }}>업로드 중…</span>
+                  <span style={{ color: 'var(--muted)', fontSize: 11 }}>{t('uploading')}</span>
                 ) : (
                   <span style={{ color: 'var(--muted-2)', fontSize: 22 }}>🃏</span>
                 )}
@@ -301,7 +304,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                   }}
                 >
-                  📁 파일 업로드
+                  {t('btn_file_upload')}
                 </button>
 
                 {/* 카메라 스캔 */}
@@ -313,7 +316,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                   }}
                 >
-                  📸 카메라 스캔
+                  {t('btn_camera')}
                 </button>
 
                 {/* URL 직접 입력 */}
@@ -321,14 +324,14 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
                   style={{ ...fieldStyle, fontSize: 12 }}
                   value={imageUrl.startsWith('data:') ? '' : imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="또는 이미지 URL 직접 입력"
+                  placeholder={t('img_url_placeholder')}
                 />
               </div>
             </div>
 
             {/* 카드번호 입력 → 변형 선택 */}
             <div style={{ marginTop: 12 }}>
-              <Field label="카드번호 (입력하면 같은 번호 일러스트를 자동 검색)">
+              <Field label={t('field_card_number')}>
                 <input
                   style={fieldStyle}
                   value={cardNumber}
@@ -346,8 +349,8 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
           </Section>
 
           {/* ── 기본 정보 ── */}
-          <Section title="기본 정보">
-            <Field label="카드명 *">
+          <Section title={t('sec_info')}>
+            <Field label={t('field_card_name')}>
               <input
                 style={fieldStyle}
                 value={name}
@@ -357,12 +360,12 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
               />
             </Field>
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 10 }}>
-              <Field label="게임">
+              <Field label={t('field_game')}>
                 <select style={fieldStyle} value={game} onChange={(e) => setGame(e.target.value as Game)}>
                   {GAMES.map((g) => <option key={g}>{g}</option>)}
                 </select>
               </Field>
-              <Field label="버전 · 등급">
+              <Field label={t('field_grade')}>
                 <input
                   style={fieldStyle}
                   value={grade}
@@ -370,7 +373,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
                   placeholder="예: PSA 10"
                 />
               </Field>
-              <Field label="구매일">
+              <Field label={t('field_buy_date')}>
                 <input
                   type="date"
                   style={fieldStyle}
@@ -382,17 +385,17 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
           </Section>
 
           {/* ── 구매 금액 ── */}
-          <Section title="구매 금액">
+          <Section title={t('sec_purchase')}>
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 10 }}>
-              <Field label="구매가">
+              <Field label={t('field_buy_price')}>
                 <input style={fieldStyle} inputMode="decimal" value={buyPrice} onChange={(e) => setBuyPrice(e.target.value)} placeholder="0" />
               </Field>
-              <Field label="통화">
+              <Field label={t('field_currency')}>
                 <select style={fieldStyle} value={currency} onChange={(e) => handleCurrencyChange(e.target.value as Currency)}>
                   {CURRENCIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
               </Field>
-              <Field label={currency === 'KRW' ? '환율' : `환율 (1 ${currency} = ? 원)`}>
+              <Field label={currency === 'KRW' ? t('field_fx_rate') : t('field_fx_rate_detail', { cur: currency })}>
                 <input
                   style={fieldStyle} inputMode="decimal" value={fxRate}
                   onChange={(e) => setFxRate(e.target.value)}
@@ -402,29 +405,29 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
             </div>
             <p style={{ color: 'var(--muted-2)', fontSize: 11.5, marginTop: 6, lineHeight: 1.4 }}>
               {currency === 'KRW'
-                ? '원화 구매는 환율이 1로 고정됩니다.'
-                : `기본값은 참고용이에요. 실제 결제 시점 환율로 수정하세요. (예: 1 ${currency} ≈ ${FX_DEFAULT[currency]}원)`}
+                ? t('krw_fx_note')
+                : t('fx_note', { cur: currency, rate: FX_DEFAULT[currency] })}
             </p>
           </Section>
 
           {/* ── 부대 비용 ── */}
-          <Section title="부대 비용 (원화)">
+          <Section title={t('sec_extra')}>
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 10 }}>
-              <Field label="관세">
+              <Field label={t('field_customs')}>
                 <input style={fieldStyle} inputMode="decimal" value={customs} onChange={(e) => setCustoms(e.target.value)} placeholder="0" />
               </Field>
-              <Field label="배송대행비">
+              <Field label={t('field_shipping')}>
                 <input style={fieldStyle} inputMode="decimal" value={shipping} onChange={(e) => setShipping(e.target.value)} placeholder="0" />
               </Field>
-              <Field label="기타비용">
+              <Field label={t('field_etc_cost')}>
                 <input style={fieldStyle} inputMode="decimal" value={etcCost} onChange={(e) => setEtcCost(e.target.value)} placeholder="0" />
               </Field>
             </div>
           </Section>
 
           {/* ── 현재 시세 ── */}
-          <Section title="현재 시세 (원화)">
-            <Field label="현재가 — 지금 시세 (비워두면 손익 계산 제외)">
+          <Section title={t('sec_current')}>
+            <Field label={t('field_current_price')}>
               <input
                 style={fieldStyle} inputMode="decimal" value={currentPrice}
                 onChange={(e) => setCurrentPrice(e.target.value)}
@@ -441,7 +444,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
               display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 2,
             }}
           >
-            <span style={{ color: 'var(--muted)', fontSize: 12, fontWeight: 600 }}>총원가 (자동 계산)</span>
+            <span style={{ color: 'var(--muted)', fontSize: 12, fontWeight: 600 }}>{t('total_cost_label')}</span>
             <span className="num" style={{ fontSize: 18, fontWeight: 800, color: 'var(--accent)' }}>
               {won(totalCost)}
             </span>
@@ -461,7 +464,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
                   fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                 }}
               >
-                삭제
+                {t('btn_delete')}
               </button>
             )}
             <span style={{ flex: 1 }} />
@@ -473,7 +476,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
                 fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
               }}
             >
-              취소
+              {t('btn_cancel')}
             </button>
             <button
               onClick={handleSave}
@@ -483,7 +486,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
                 fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
               }}
             >
-              저장
+              {t('btn_save')}
             </button>
           </div>
         </div>

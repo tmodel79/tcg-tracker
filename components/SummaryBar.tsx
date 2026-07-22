@@ -1,6 +1,7 @@
 'use client'
 
 import { wonPlain, pctFmt } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n'
 import type { PortfolioSummary } from '@/types/card'
 
 interface SummaryBarProps {
@@ -8,6 +9,7 @@ interface SummaryBarProps {
 }
 
 export function SummaryBar({ summary }: SummaryBarProps) {
+  const { t } = useI18n()
   const { invest, value, pnl, pct, totalCards, pricedCards } = summary
   const dir = pnl > 0 ? 'up' : pnl < 0 ? 'down' : 'flat'
   const bgClass = pnl > 0 ? 'bg-up' : pnl < 0 ? 'bg-down' : ''
@@ -26,38 +28,42 @@ export function SummaryBar({ summary }: SummaryBarProps) {
       >
         {/* 총 투자금 */}
         <StatCard>
-          <div className="lbl">총 투자금 (들어간 돈)</div>
+          <div className="lbl">{t('summary_invest')}</div>
           <div className="val num">{wonPlain(invest)}</div>
-          <div className="sub">보유 {totalCards}장</div>
+          <div className="sub">{t('summary_cards', { n: totalCards })}</div>
         </StatCard>
 
         {/* 총 평가액 */}
         <StatCard>
-          <div className="lbl">총 평가액 (현재 가치)</div>
+          <div className="lbl">{t('summary_value')}</div>
           <div className="val num">{wonPlain(value)}</div>
           <div className="sub">
-            시세 입력 {pricedCards} / {totalCards}장
+            {t('summary_priced', { n: pricedCards, total: totalCards })}
           </div>
         </StatCard>
 
         {/* 총 손익 */}
         <StatCard className={bgClass}>
           <span className="streak" />
-          <div className="lbl">총 손익</div>
+          <div className="lbl">{t('summary_pnl')}</div>
           <div className={`val num ${dir}`}>
             {pnl >= 0 ? '+' : ''}
             {wonPlain(pnl)}
           </div>
-          <div className="sub">평가액 − 투자금</div>
+          <div className="sub">{t('summary_pnl_desc')}</div>
         </StatCard>
 
         {/* 전체 수익률 */}
         <StatCard className={bgClass}>
           <span className="streak" />
-          <div className="lbl">전체 수익률</div>
+          <div className="lbl">{t('summary_pct')}</div>
           <div className={`val num ${dir}`}>{pctFmt(pct)}</div>
           <div className="sub">
-            {dir === 'up' ? '이익 구간' : dir === 'down' ? '손실 구간' : '손익 없음'}
+            {dir === 'up'
+              ? t('summary_profit')
+              : dir === 'down'
+              ? t('summary_loss')
+              : t('summary_flat')}
           </div>
         </StatCard>
       </div>
@@ -86,7 +92,7 @@ export function SummaryBar({ summary }: SummaryBarProps) {
               verticalAlign: 'middle',
             }}
           />
-          <b>상승 · 이익</b>
+          <b>{t('legend_up')}</b>
         </span>
         <span>
           <span
@@ -100,9 +106,9 @@ export function SummaryBar({ summary }: SummaryBarProps) {
               verticalAlign: 'middle',
             }}
           />
-          <b>하락 · 손실</b>
+          <b>{t('legend_down')}</b>
         </span>
-        <span style={{ color: 'var(--muted-2)' }}>오르면 빨강 / 내리면 파랑</span>
+        <span style={{ color: 'var(--muted-2)' }}>{t('legend_note')}</span>
       </div>
     </>
   )

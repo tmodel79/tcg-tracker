@@ -4,16 +4,19 @@ import { useCallback, useState } from 'react'
 import { useCards } from '@/lib/useCards'
 import { calcPortfolio } from '@/lib/calc'
 import { buildCsvBlob, downloadBlob, stamp } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n'
 import { SummaryBar } from '@/components/SummaryBar'
 import { Controls } from '@/components/Controls'
 import { CardTable } from '@/components/CardTable'
 import { CardModal } from '@/components/CardModal'
 import { ImportModal } from '@/components/ImportModal'
+import { LangSelector } from '@/components/LangSelector'
 import { Toast } from '@/components/Toast'
 import type { Card, SortMode } from '@/types/card'
 
 export default function HomePage() {
   const { cards, loading, error, saveCard, deleteCard, importJson } = useCards()
+  const { t } = useI18n()
 
   // UI 상태
   const [filterGame, setFilterGame] = useState('전체')
@@ -53,12 +56,13 @@ export default function HomePage() {
       try {
         await saveCard(data, isNew)
         setCardModalOpen(false)
-        toast(isNew ? '카드를 추가했어요' : '수정했어요')
+        toast(isNew ? t('toast_added') : t('toast_edited'))
       } catch (e) {
-        toast('저장에 실패했어요: ' + (e as Error).message)
+        toast(t('toast_save_fail', { msg: (e as Error).message }))
       }
     },
-    [saveCard]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [saveCard, t]
   )
 
   // 삭제
@@ -67,12 +71,13 @@ export default function HomePage() {
       try {
         await deleteCard(id)
         setCardModalOpen(false)
-        toast('삭제했어요')
+        toast(t('toast_deleted'))
       } catch (e) {
-        toast('삭제에 실패했어요: ' + (e as Error).message)
+        toast(t('toast_delete_fail', { msg: (e as Error).message }))
       }
     },
-    [deleteCard]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [deleteCard, t]
   )
 
   // JSON import
@@ -80,28 +85,29 @@ export default function HomePage() {
     async (imported: Card[]) => {
       try {
         await importJson(imported)
-        toast(`${imported.length}장을 불러왔어요`)
+        toast(t('toast_imported', { n: imported.length }))
       } catch (e) {
-        toast('불러오기에 실패했어요: ' + (e as Error).message)
+        toast(t('toast_import_fail', { msg: (e as Error).message }))
       }
     },
-    [importJson]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [importJson, t]
   )
 
   // CSV 내보내기
   const handleCsvExport = () => {
-    if (cards.length === 0) { toast('내보낼 카드가 없어요'); return }
+    if (cards.length === 0) { toast(t('toast_no_export')); return }
     const blob = buildCsvBlob(cards)
     downloadBlob(blob, `CardLedger_${stamp()}.csv`)
-    toast('CSV를 내려받았어요')
+    toast(t('toast_csv_done'))
   }
 
   // JSON 백업
   const handleJsonBackup = () => {
-    if (cards.length === 0) { toast('백업할 카드가 없어요'); return }
+    if (cards.length === 0) { toast(t('toast_no_backup')); return }
     const blob = new Blob([JSON.stringify(cards, null, 2)], { type: 'application/json' })
     downloadBlob(blob, `CardLedger_backup_${stamp()}.json`)
-    toast('백업 파일을 내려받았어요')
+    toast(t('toast_backup_done'))
   }
 
   const btnStyle: React.CSSProperties = {
@@ -146,24 +152,25 @@ export default function HomePage() {
             CardLedger
           </h1>
           <small className="header-sub" style={{ color: 'var(--muted)', fontSize: 12, fontWeight: 500 }}>
-            카드 포트폴리오 · 주식창 스타일
+            {t('app_subtitle')}
           </small>
         </div>
-        <div className="header-btns" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div className="header-btns" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <LangSelector />
           <button className="btn-secondary" style={{ ...btnStyle, background: 'transparent', color: 'var(--muted)' }} onClick={() => setImportModalOpen(true)}>
-            JSON 불러오기
+            {t('btn_import_json')}
           </button>
           <button className="btn-secondary" style={{ ...btnStyle, background: 'transparent', color: 'var(--muted)' }} onClick={handleJsonBackup}>
-            JSON 백업
+            {t('btn_backup_json')}
           </button>
           <button className="btn-secondary" style={btnStyle} onClick={handleCsvExport}>
-            CSV 내보내기
+            {t('btn_export_csv')}
           </button>
           <button
             style={{ ...btnStyle, background: 'var(--accent)', color: 'var(--accent-ink)', border: '1px solid var(--accent)' }}
             onClick={handleAddClick}
           >
-            + 카드 추가
+            {t('btn_add_card')}
           </button>
         </div>
       </div>
@@ -201,8 +208,8 @@ export default function HomePage() {
 
       {/* 하단 안내 */}
       <div style={{ color: 'var(--muted-2)', fontSize: 11.5, textAlign: 'center', marginTop: 22, lineHeight: 1.6 }}>
-        현재 시세는 직접 입력하는 방식입니다 (자동 조회 미지원).<br />
-        중요한 자료는 <b>JSON 백업</b>으로 파일을 따로 보관하세요.
+        {t('footer_note')}<br />
+        {t('footer_tip')}
       </div>
 
       {/* 모달들 */}

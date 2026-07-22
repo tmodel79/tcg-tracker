@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import type { Card } from '@/types/card'
+import { useI18n } from '@/lib/i18n'
 
 interface ImportModalProps {
   open: boolean
@@ -10,6 +11,7 @@ interface ImportModalProps {
 }
 
 export function ImportModal({ open, onClose, onImport }: ImportModalProps) {
+  const { t } = useI18n()
   const fileRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<Card[] | null>(null)
   const [err, setErr] = useState('')
@@ -23,7 +25,7 @@ export function ImportModal({ open, onClose, onImport }: ImportModalProps) {
         setPreview(arr as Card[])
         setErr('')
       } catch {
-        setErr('백업 파일을 읽지 못했어요. JSON 형식이 맞는지 확인하세요.')
+        setErr(t('import_err'))
         setPreview(null)
       }
     }
@@ -83,10 +85,10 @@ export function ImportModal({ open, onClose, onImport }: ImportModalProps) {
         aria-modal="true"
       >
         <h2 style={{ margin: '0 0 4px', fontSize: 17, fontWeight: 800 }}>
-          JSON 백업 불러오기
+          {t('import_title')}
         </h2>
         <p style={{ color: 'var(--muted)', fontSize: 12.5, margin: '0 0 20px' }}>
-          기존 HTML 앱에서 내려받은 <b>TCG_백업_*.json</b> 파일을 그대로 올릴 수 있어요.
+          {t('import_subtitle')}
         </p>
 
         {/* 드래그 앤 드롭 존 */}
@@ -114,12 +116,12 @@ export function ImportModal({ open, onClose, onImport }: ImportModalProps) {
         >
           <div style={{ fontSize: 32, marginBottom: 8 }}>📂</div>
           <div>
-            <b style={{ color: 'var(--text)' }}>파일을 여기에 끌어다 놓거나</b>
+            <b style={{ color: 'var(--text)' }}>{t('import_drop')}</b>
             <br />
-            클릭해서 선택하세요
+            {t('import_click')}
           </div>
           <div style={{ fontSize: 12, color: 'var(--muted-2)', marginTop: 8 }}>
-            JSON 파일만 지원 (TCG_백업_*.json)
+            {t('import_format')}
           </div>
         </div>
 
@@ -147,7 +149,7 @@ export function ImportModal({ open, onClose, onImport }: ImportModalProps) {
             }}
           >
             <div style={{ fontWeight: 700, marginBottom: 6 }}>
-              ✅ {preview.length}장 확인됨
+              {t('import_confirmed', { n: preview.length })}
             </div>
             <div style={{ color: 'var(--muted)', fontSize: 12, lineHeight: 1.8 }}>
               {preview.slice(0, 5).map((c, i) => (
@@ -156,11 +158,13 @@ export function ImportModal({ open, onClose, onImport }: ImportModalProps) {
                 </div>
               ))}
               {preview.length > 5 && (
-                <div style={{ color: 'var(--muted-2)' }}>… 외 {preview.length - 5}장</div>
+                <div style={{ color: 'var(--muted-2)' }}>
+                  {t('import_more', { n: preview.length - 5 })}
+                </div>
               )}
             </div>
             <p style={{ color: 'var(--muted-2)', fontSize: 11.5, margin: '10px 0 0' }}>
-              ⚠️ 불러오면 현재 DB의 카드가 이 백업으로 <b>추가/병합</b>됩니다. (같은 id는 덮어씀)
+              {t('import_warning')}
             </p>
           </div>
         )}
@@ -186,7 +190,7 @@ export function ImportModal({ open, onClose, onImport }: ImportModalProps) {
               fontFamily: 'inherit',
             }}
           >
-            취소
+            {t('btn_cancel')}
           </button>
           <button
             onClick={handleConfirm}
@@ -203,7 +207,9 @@ export function ImportModal({ open, onClose, onImport }: ImportModalProps) {
               fontFamily: 'inherit',
             }}
           >
-            {preview ? `${preview.length}장 불러오기` : '파일을 먼저 선택하세요'}
+            {preview
+              ? t('btn_load_n', { n: preview.length })
+              : t('btn_select_first')}
           </button>
         </div>
       </div>

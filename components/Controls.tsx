@@ -2,6 +2,7 @@
 
 import type { Card, SortMode } from '@/types/card'
 import { GAMES_WITH_ALL } from '@/types/card'
+import { useI18n } from '@/lib/i18n'
 
 interface ControlsProps {
   cards: Card[]
@@ -30,6 +31,8 @@ export function Controls({
   onSearchChange,
   onSortChange,
 }: ControlsProps) {
+  const { t } = useI18n()
+
   return (
     <div
       style={{
@@ -49,6 +52,8 @@ export function Controls({
               : cards.filter((c) => c.game === g).length
           if (g !== '전체' && cnt === 0) return null
           const active = filterGame === g
+          // Display '전체' as the translated label, but keep raw value for logic
+          const displayLabel = g === '전체' ? t('filter_all') : g
           return (
             <button
               key={g}
@@ -65,7 +70,7 @@ export function Controls({
                 fontFamily: 'inherit',
               }}
             >
-              {g}
+              {displayLabel}
               {g !== '전체' && (
                 <span style={{ opacity: 0.6 }}> {cnt}</span>
               )}
@@ -79,7 +84,7 @@ export function Controls({
       {/* 검색 */}
       <input
         style={{ ...inputStyle, width: 180 }}
-        placeholder="카드명 검색…"
+        placeholder={t('search_placeholder')}
         autoComplete="off"
         onChange={(e) => onSearchChange(e.target.value)}
       />
@@ -90,12 +95,12 @@ export function Controls({
         value={sortMode}
         onChange={(e) => onSortChange(e.target.value as SortMode)}
       >
-        <option value="pct">수익률 높은 순</option>
-        <option value="pctAsc">수익률 낮은 순</option>
-        <option value="pnl">손익 큰 순</option>
-        <option value="cost">총원가 큰 순</option>
-        <option value="date">최근 구매 순</option>
-        <option value="name">카드명 순</option>
+        <option value="pct">{t('sort_pct_desc')}</option>
+        <option value="pctAsc">{t('sort_pct_asc')}</option>
+        <option value="pnl">{t('sort_pnl')}</option>
+        <option value="cost">{t('sort_cost')}</option>
+        <option value="date">{t('sort_date')}</option>
+        <option value="name">{t('sort_name')}</option>
       </select>
     </div>
   )
