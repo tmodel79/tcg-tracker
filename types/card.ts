@@ -5,6 +5,7 @@
 // ========================================
 
 export type Currency = 'KRW' | 'USD' | 'JPY' | 'EUR'
+export type Language = 'JP' | 'EN' | 'FR' | 'KR'
 
 export type Game =
   | '원피스'
@@ -31,6 +32,7 @@ export interface Card {
   prev_price: number | null     // 직전 시세 (등락 표시용)
   card_number: string | null    // 카드번호 (예: OP01-001, P-033)
   image_url: string | null      // 카드 이미지 URL (Supabase Storage or external)
+  language: Language | null     // 언어판 (JP/EN/FR/KR)
   created_at: string
   updated_at: string
 }
