@@ -94,9 +94,9 @@ export function CardTable({
           <tr>
             <Th left>카드</Th>
             <Th className="hide-m">구매일</Th>
-            <Th>총원가</Th>
+            <Th className="hide-s">총원가</Th>
             <Th>현재가</Th>
-            <Th>손익</Th>
+            <Th className="hide-s">손익</Th>
             <Th>수익률</Th>
           </tr>
         </thead>
@@ -109,6 +109,13 @@ export function CardTable({
       <style>{`
         .hide-m { }
         @media (max-width: 760px) { .hide-m { display: none; } }
+        .hide-s { }
+        @media (max-width: 520px) { .hide-s { display: none; } }
+        @media (max-width: 520px) {
+          .mobile-sub { display: block !important; }
+          .card-td { padding: 10px 10px !important; }
+          .data-td { padding: 10px 10px !important; }
+        }
         tbody tr:last-child td { border-bottom: none !important; }
       `}</style>
     </div>
@@ -169,7 +176,7 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
       }}
     >
       {/* 카드 썸네일 + 이름 + 배지 */}
-      <td className="cardname-cell" style={{ ...tdStyle, textAlign: 'left' }}>
+      <td className="cardname-cell card-td" style={{ ...tdStyle, textAlign: 'left' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {/* 썸네일 */}
           <div
@@ -198,8 +205,8 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
           </div>
 
           {/* 이름 + 배지 */}
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 14 }}>{card.name}</div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontWeight: 700, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{card.name}</div>
             <div style={{ color: 'var(--muted-2)', fontSize: 11.5, marginTop: 2 }}>
               <span
                 style={{
@@ -247,6 +254,15 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
                 </span>
               )}
             </div>
+            {/* 모바일 전용: 투자금 · 손익 인라인 표시 */}
+            <div className="mobile-sub" style={{ display: 'none', marginTop: 5, fontSize: 11.5, color: 'var(--muted)' }}>
+              <span>투자 {wonPlain(k.totalCost)}</span>
+              {k.hasNow && (
+                <span className={`num ${dir}`} style={{ marginLeft: 8, fontWeight: 700 }}>
+                  {k.pnl >= 0 ? '+' : ''}{wonPlain(k.pnl)}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </td>
@@ -260,12 +276,12 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
       </td>
 
       {/* 총원가 */}
-      <td className="num" style={tdStyle}>
+      <td className="num hide-s data-td" style={tdStyle}>
         {wonPlain(k.totalCost)}
       </td>
 
       {/* 현재가 + 직전대비 */}
-      <td style={tdStyle}>
+      <td className="data-td" style={tdStyle}>
         {k.hasNow ? (
           <>
             <span className="num">{wonPlain(k.now!)}</span>
@@ -285,7 +301,7 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
       </td>
 
       {/* 손익 */}
-      <td style={{ ...tdStyle, fontWeight: 700 }}>
+      <td className="hide-s data-td" style={{ ...tdStyle, fontWeight: 700 }}>
         {k.hasNow ? (
           <span className={`num ${dir}`}>
             {k.pnl >= 0 ? '+' : ''}
@@ -297,7 +313,7 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
       </td>
 
       {/* 수익률 */}
-      <td style={{ ...tdStyle, fontWeight: 800 }}>
+      <td className="data-td" style={{ ...tdStyle, fontWeight: 800 }}>
         {k.hasNow ? (
           <span className={`num ${dir}`}>{pctFmt(k.pct)}</span>
         ) : (

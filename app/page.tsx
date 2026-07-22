@@ -139,24 +139,24 @@ export default function HomePage() {
   return (
     <div style={{ maxWidth: 1120, margin: '0 auto', padding: '22px 20px 60px' }}>
       {/* 헤더 */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
           <h1 style={{ fontSize: 19, fontWeight: 800, margin: 0, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 12px var(--accent)', display: 'inline-block' }} />
             CardLedger
           </h1>
-          <small style={{ color: 'var(--muted)', fontSize: 12, fontWeight: 500 }}>
+          <small className="header-sub" style={{ color: 'var(--muted)', fontSize: 12, fontWeight: 500 }}>
             카드 포트폴리오 · 주식창 스타일
           </small>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button style={{ ...btnStyle, background: 'transparent', color: 'var(--muted)' }} onClick={() => setImportModalOpen(true)}>
+        <div className="header-btns" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button className="btn-secondary" style={{ ...btnStyle, background: 'transparent', color: 'var(--muted)' }} onClick={() => setImportModalOpen(true)}>
             JSON 불러오기
           </button>
-          <button style={{ ...btnStyle, background: 'transparent', color: 'var(--muted)' }} onClick={handleJsonBackup}>
+          <button className="btn-secondary" style={{ ...btnStyle, background: 'transparent', color: 'var(--muted)' }} onClick={handleJsonBackup}>
             JSON 백업
           </button>
-          <button style={btnStyle} onClick={handleCsvExport}>
+          <button className="btn-secondary" style={btnStyle} onClick={handleCsvExport}>
             CSV 내보내기
           </button>
           <button
@@ -167,6 +167,14 @@ export default function HomePage() {
           </button>
         </div>
       </div>
+      <style>{`
+        @media (max-width: 560px) {
+          .header-sub { display: none; }
+          .header-btns { width: 100%; display: grid !important; grid-template-columns: 1fr 1fr !important; }
+          .header-btns button { font-size: 12px !important; padding: 9px 6px !important; text-align: center; }
+          .header-btns button:last-child { grid-column: 1 / -1; }
+        }
+      `}</style>
 
       {/* 포트폴리오 요약 */}
       <SummaryBar summary={summary} />

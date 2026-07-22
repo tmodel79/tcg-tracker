@@ -16,6 +16,7 @@ export function SummaryBar({ summary }: SummaryBarProps) {
     <>
       {/* 히어로 숫자 4개 */}
       <div
+        className="summary-grid"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
@@ -66,7 +67,8 @@ export function SummaryBar({ summary }: SummaryBarProps) {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 14,
+          flexWrap: 'wrap',
+          gap: '6px 14px',
           color: 'var(--muted-2)',
           fontSize: 12,
           margin: '14px 2px 16px',
@@ -100,7 +102,7 @@ export function SummaryBar({ summary }: SummaryBarProps) {
           />
           <b>하락 · 손실</b>
         </span>
-        <span>· 한국 주식창과 같은 색 (오르면 빨강 / 내리면 파랑)</span>
+        <span style={{ color: 'var(--muted-2)' }}>오르면 빨강 / 내리면 파랑</span>
       </div>
     </>
   )
@@ -115,7 +117,7 @@ function StatCard({
 }) {
   return (
     <div
-      className={className}
+      className={`stat-card ${className}`}
       style={{
         background: 'linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%)',
         border: '1px solid var(--border)',
@@ -130,6 +132,13 @@ function StatCard({
         .val { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
         .sub { font-size: 12px; color: var(--muted-2); margin-top: 4px; }
         .streak { position: absolute; right: 0; top: 0; bottom: 0; width: 4px; }
+        @media (max-width: 640px) {
+          .summary-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .val { font-size: 19px !important; }
+          .lbl { font-size: 11px !important; margin-bottom: 5px !important; }
+          .sub { font-size: 11px !important; }
+          .stat-card { padding: 12px 14px !important; }
+        }
       `}</style>
       {children}
     </div>
