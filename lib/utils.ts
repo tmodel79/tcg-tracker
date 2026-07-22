@@ -43,10 +43,11 @@ export const wonCompact = (n: number): string => {
  * 수익률 압축: ±999% 이상이면 ×N 배수로 표시
  * e.g. +99058.2% → "+990.6배"
  */
-export const pctCompact = (n: number): string => {
+export const pctCompact = (n: number, locale = 'ko'): string => {
   if (Math.abs(n) >= 1000) {
     const mul = n / 100
-    return (n >= 0 ? '+' : '') + mul.toFixed(1) + '배'
+    const unit = locale === 'ko' ? '배' : 'x'
+    return (n >= 0 ? '+' : '') + mul.toFixed(1) + unit
   }
   return pctFmt(n)
 }

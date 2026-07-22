@@ -9,7 +9,7 @@ interface SummaryBarProps {
 }
 
 export function SummaryBar({ summary }: SummaryBarProps) {
-  const { t, fmtC } = useI18n()
+  const { t, fmtC, locale } = useI18n()
   const { invest, value, pnl, pct, totalCards, pricedCards } = summary
   const dir = pnl > 0 ? 'up' : pnl < 0 ? 'down' : 'flat'
   const bgClass = pnl > 0 ? 'bg-up' : pnl < 0 ? 'bg-down' : ''
@@ -57,7 +57,7 @@ export function SummaryBar({ summary }: SummaryBarProps) {
         <StatCard className={bgClass}>
           <span className="streak" />
           <div className="lbl">{t('summary_pct')}</div>
-          <div className={`val num ${dir}`}>{pctCompact(pct)}</div>
+          <div className={`val num ${dir}`}>{pctCompact(pct, locale)}</div>
           <div className="sub">
             {dir === 'up'
               ? t('summary_profit')

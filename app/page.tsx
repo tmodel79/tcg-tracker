@@ -127,7 +127,7 @@ export default function HomePage() {
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: 'var(--muted)', fontSize: 14 }}>
-        불러오는 중…
+        {t('loading')}
       </div>
     )
   }
@@ -136,9 +136,9 @@ export default function HomePage() {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', flexDirection: 'column', gap: 12, color: 'var(--gain)', padding: 32 }}>
         <div style={{ fontSize: 28 }}>⚠️</div>
-        <div style={{ fontWeight: 700 }}>Supabase 연결 오류</div>
+        <div style={{ fontWeight: 700 }}>{t('error_title')}</div>
         <div style={{ color: 'var(--muted)', fontSize: 13, maxWidth: 400, textAlign: 'center' }}>{error}</div>
-        <div style={{ color: 'var(--muted-2)', fontSize: 12 }}>.env.local 파일의 NEXT_PUBLIC_SUPABASE_URL·ANON_KEY를 확인해 주세요.</div>
+        <div style={{ color: 'var(--muted-2)', fontSize: 12 }}>{t('error_hint')}</div>
       </div>
     )
   }

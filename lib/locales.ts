@@ -144,6 +144,12 @@ const ko: Translations = {
   import_err: '백업 파일을 읽지 못했어요. JSON 형식이 맞는지 확인하세요.',
   btn_load_n: '{n}장 불러오기',
   btn_select_first: '파일을 먼저 선택하세요',
+  loading: '불러오는 중…',
+  error_title: 'Supabase 연결 오류',
+  error_hint: '.env.local 파일의 NEXT_PUBLIC_SUPABASE_URL·ANON_KEY를 확인해 주세요.',
+  ex: '예',
+  img_upload_fail: '이미지 업로드 실패: {msg}',
+  game_other: '기타',
 }
 
 const en: Translations = {
@@ -253,6 +259,12 @@ const en: Translations = {
     'Could not read the backup file. Please check that it is valid JSON.',
   btn_load_n: 'Load {n} cards',
   btn_select_first: 'Please select a file first',
+  loading: 'Loading…',
+  error_title: 'Connection Error',
+  error_hint: 'Check NEXT_PUBLIC_SUPABASE_URL · ANON_KEY in your .env.local file.',
+  ex: 'e.g.',
+  img_upload_fail: 'Image upload failed: {msg}',
+  game_other: 'Other',
 }
 
 const ja: Translations = {
@@ -361,6 +373,12 @@ const ja: Translations = {
     'バックアップファイルを読み込めませんでした。JSON形式を確認してください。',
   btn_load_n: '{n}枚読み込む',
   btn_select_first: 'ファイルを先に選択してください',
+  loading: '読み込み中…',
+  error_title: '接続エラー',
+  error_hint: '.env.local の NEXT_PUBLIC_SUPABASE_URL·ANON_KEY を確認してください。',
+  ex: '例',
+  img_upload_fail: '画像アップロード失敗: {msg}',
+  game_other: 'その他',
 }
 
 const zhCN: Translations = {
@@ -467,6 +485,12 @@ const zhCN: Translations = {
   import_err: '无法读取备份文件，请确认JSON格式是否正确。',
   btn_load_n: '导入 {n} 张卡牌',
   btn_select_first: '请先选择文件',
+  loading: '加载中…',
+  error_title: '连接错误',
+  error_hint: '请检查 .env.local 中的 NEXT_PUBLIC_SUPABASE_URL·ANON_KEY。',
+  ex: '例',
+  img_upload_fail: '图片上传失败：{msg}',
+  game_other: '其他',
 }
 
 const zhTW: Translations = {
@@ -573,6 +597,12 @@ const zhTW: Translations = {
   import_err: '無法讀取備份檔案，請確認JSON格式是否正確。',
   btn_load_n: '匯入 {n} 張卡牌',
   btn_select_first: '請先選擇檔案',
+  loading: '載入中…',
+  error_title: '連線錯誤',
+  error_hint: '請檢查 .env.local 中的 NEXT_PUBLIC_SUPABASE_URL·ANON_KEY。',
+  ex: '例',
+  img_upload_fail: '圖片上傳失敗：{msg}',
+  game_other: '其他',
 }
 
 const zhHK: Translations = {
@@ -679,6 +709,12 @@ const zhHK: Translations = {
   import_err: '無法讀取備份檔案，請確認JSON格式係咪正確。',
   btn_load_n: '匯入 {n} 張卡牌',
   btn_select_first: '請先選擇檔案',
+  loading: '載入中…',
+  error_title: '連線錯誤',
+  error_hint: '請檢查 .env.local 入面嘅 NEXT_PUBLIC_SUPABASE_URL·ANON_KEY。',
+  ex: '例',
+  img_upload_fail: '圖片上傳失敗：{msg}',
+  game_other: '其他',
 }
 
 const th: Translations = {
@@ -786,6 +822,12 @@ const th: Translations = {
   import_err: 'ไม่สามารถอ่านไฟล์สำรองข้อมูลได้ โปรดตรวจสอบรูปแบบ JSON',
   btn_load_n: 'โหลด {n} ใบ',
   btn_select_first: 'โปรดเลือกไฟล์ก่อน',
+  loading: 'กำลังโหลด…',
+  error_title: 'ข้อผิดพลาดการเชื่อมต่อ',
+  error_hint: 'ตรวจสอบ NEXT_PUBLIC_SUPABASE_URL·ANON_KEY ใน .env.local',
+  ex: 'เช่น',
+  img_upload_fail: 'อัปโหลดรูปภาพล้มเหลว: {msg}',
+  game_other: 'อื่นๆ',
 }
 
 const hi: Translations = {
@@ -893,6 +935,12 @@ const hi: Translations = {
   import_err: 'बैकअप फ़ाइल पढ़ नहीं सका। JSON प्रारूप जांचें।',
   btn_load_n: '{n} कार्ड लोड करें',
   btn_select_first: 'पहले फ़ाइल चुनें',
+  loading: 'लोड हो रहा है…',
+  error_title: 'कनेक्शन त्रुटि',
+  error_hint: '.env.local में NEXT_PUBLIC_SUPABASE_URL·ANON_KEY जांचें।',
+  ex: 'जैसे',
+  img_upload_fail: 'छवि अपलोड विफल: {msg}',
+  game_other: 'अन्य',
 }
 
 const es: Translations = {
@@ -1000,6 +1048,12 @@ const es: Translations = {
   import_err: 'No se pudo leer el archivo de copia de seguridad. Verifica que sea JSON válido.',
   btn_load_n: 'Cargar {n} cartas',
   btn_select_first: 'Selecciona un archivo primero',
+  loading: 'Cargando…',
+  error_title: 'Error de conexión',
+  error_hint: 'Verifica NEXT_PUBLIC_SUPABASE_URL·ANON_KEY en tu archivo .env.local.',
+  ex: 'ej.',
+  img_upload_fail: 'Error al subir imagen: {msg}',
+  game_other: 'Otro',
 }
 
 const it: Translations = {
@@ -1108,6 +1162,12 @@ const it: Translations = {
   import_err: 'Impossibile leggere il file di backup. Controlla che sia JSON valido.',
   btn_load_n: 'Carica {n} carte',
   btn_select_first: 'Seleziona prima un file',
+  loading: 'Caricamento…',
+  error_title: 'Errore di connessione',
+  error_hint: 'Verifica NEXT_PUBLIC_SUPABASE_URL·ANON_KEY nel file .env.local.',
+  ex: 'es.',
+  img_upload_fail: 'Caricamento immagine fallito: {msg}',
+  game_other: 'Altro',
 }
 
 const fr: Translations = {
@@ -1217,6 +1277,12 @@ const fr: Translations = {
     'Impossible de lire le fichier de sauvegarde. Vérifiez qu\'il est en JSON valide.',
   btn_load_n: 'Charger {n} cartes',
   btn_select_first: 'Sélectionnez d\'abord un fichier',
+  loading: 'Chargement…',
+  error_title: 'Erreur de connexion',
+  error_hint: 'Vérifiez NEXT_PUBLIC_SUPABASE_URL·ANON_KEY dans votre fichier .env.local.',
+  ex: 'ex.',
+  img_upload_fail: "Échec du téléchargement de l'image : {msg}",
+  game_other: 'Autre',
 }
 
 export const locales: Record<Locale, Translations> = {

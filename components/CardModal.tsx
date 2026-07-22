@@ -21,10 +21,10 @@ interface CardModalProps {
 }
 
 const CURRENCIES: { value: Currency; label: string }[] = [
-  { value: 'KRW', label: '원 (KRW)' },
-  { value: 'USD', label: '달러 (USD)' },
-  { value: 'JPY', label: '엔 (JPY)' },
-  { value: 'EUR', label: '유로 (EUR)' },
+  { value: 'KRW', label: '₩ KRW' },
+  { value: 'USD', label: '$ USD' },
+  { value: 'JPY', label: '¥ JPY' },
+  { value: 'EUR', label: '€ EUR' },
 ]
 
 const fieldStyle: React.CSSProperties = {
@@ -42,6 +42,7 @@ const fieldStyle: React.CSSProperties = {
 
 export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalProps) {
   const { t, fmt } = useI18n()
+  const ex = t('ex')
 
   // 기본 필드
   const [name, setName] = useState('')
@@ -125,7 +126,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
       const url = await uploadCardImage(file, pendingCardId)
       setImageUrl(url)
     } catch (e: any) {
-      setErr(`이미지 업로드 실패: ${e.message}`)
+      setErr(t('img_upload_fail', { msg: e.message }))
     } finally {
       setUploading(false)
     }
@@ -336,7 +337,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
                   style={fieldStyle}
                   value={cardNumber}
                   onChange={(e) => setCardNumber(e.target.value)}
-                  placeholder="예: OP01-001, P-033, sv1-001"
+                  placeholder={`${ex}: OP01-001, P-033, sv1-001`}
                 />
               </Field>
               <CardVariantPicker
@@ -355,7 +356,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
                 style={fieldStyle}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="예: Luffy P-033 / Heihachi Yui RP-001"
+                placeholder={`${ex}: Luffy P-033 / Heihachi Yui RP-001`}
                 autoFocus
               />
             </Field>
@@ -370,7 +371,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
                   style={fieldStyle}
                   value={grade}
                   onChange={(e) => setGrade(e.target.value)}
-                  placeholder="예: PSA 10"
+                  placeholder={`${ex}: PSA 10`}
                 />
               </Field>
               <Field label={t('field_buy_date')}>
@@ -431,7 +432,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
               <input
                 style={fieldStyle} inputMode="decimal" value={currentPrice}
                 onChange={(e) => setCurrentPrice(e.target.value)}
-                placeholder="예: 1,030,000"
+                placeholder={`${ex}: 1,030,000`}
               />
             </Field>
           </Section>

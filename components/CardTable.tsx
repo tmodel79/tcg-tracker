@@ -100,7 +100,7 @@ export function CardTable({
             <Th className="hide-s">{t('col_cost')}</Th>
             <Th>{t('col_price')}</Th>
             <Th className="hide-s">{t('col_pnl')}</Th>
-            <Th>{t('col_pct')}</Th>
+            <Th minWidth={82}>{t('col_pct')}</Th>
           </tr>
         </thead>
         <tbody>
@@ -139,10 +139,12 @@ function Th({
   children,
   left,
   className,
+  minWidth,
 }: {
   children: React.ReactNode
   left?: boolean
   className?: string
+  minWidth?: number
 }) {
   return (
     <th
@@ -157,6 +159,7 @@ function Th({
         borderBottom: '1px solid var(--border)',
         letterSpacing: '0.02em',
         whiteSpace: 'nowrap',
+        ...(minWidth ? { minWidth } : {}),
       }}
     >
       {children}
@@ -165,7 +168,7 @@ function Th({
 }
 
 function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
-  const { t, fmt, fmtC } = useI18n()
+  const { t, fmt, fmtC, locale } = useI18n()
   const k = calcCard(card)
   const dir = !k.hasNow ? 'flat' : k.pnl > 0 ? 'up' : k.pnl < 0 ? 'down' : 'flat'
   const rowCls = !k.hasNow ? 'r-flat' : k.pnl > 0 ? 'r-up' : k.pnl < 0 ? 'r-down' : 'r-flat'
@@ -233,7 +236,7 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
                   color: 'var(--muted)',
                 }}
               >
-                {card.game || '기타'}
+                {card.game || t('game_other')}
               </span>
               {card.grade && (
                 <span
@@ -335,7 +338,7 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
         {k.hasNow ? (
           <span className={`num ${dir}`}>
             <span className="pct-full">{pctFmt(k.pct)}</span>
-            <span className="pct-compact">{pctCompact(k.pct)}</span>
+            <span className="pct-compact">{pctCompact(k.pct, locale)}</span>
           </span>
         ) : (
           <span style={{ color: 'var(--muted-2)', fontSize: 12 }}>—</span>
