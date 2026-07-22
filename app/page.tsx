@@ -92,7 +92,7 @@ export default function HomePage() {
   const handleCsvExport = () => {
     if (cards.length === 0) { toast('내보낼 카드가 없어요'); return }
     const blob = buildCsvBlob(cards)
-    downloadBlob(blob, `TCG_트래커_${stamp()}.csv`)
+    downloadBlob(blob, `CardLedger_${stamp()}.csv`)
     toast('CSV를 내려받았어요')
   }
 
@@ -100,7 +100,7 @@ export default function HomePage() {
   const handleJsonBackup = () => {
     if (cards.length === 0) { toast('백업할 카드가 없어요'); return }
     const blob = new Blob([JSON.stringify(cards, null, 2)], { type: 'application/json' })
-    downloadBlob(blob, `TCG_백업_${stamp()}.json`)
+    downloadBlob(blob, `CardLedger_backup_${stamp()}.json`)
     toast('백업 파일을 내려받았어요')
   }
 
@@ -143,7 +143,7 @@ export default function HomePage() {
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
           <h1 style={{ fontSize: 19, fontWeight: 800, margin: 0, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 12px var(--accent)', display: 'inline-block' }} />
-            TCG 트래커
+            CardLedger
           </h1>
           <small style={{ color: 'var(--muted)', fontSize: 12, fontWeight: 500 }}>
             카드 포트폴리오 · 주식창 스타일
