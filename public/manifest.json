@@ -1,0 +1,17 @@
+{
+  "name": "CardLedger",
+  "short_name": "CardLedger",
+  "description": "카드 컬렉션을 주식 포트폴리오처럼 관리",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0e17",
+  "theme_color": "#0a0e17",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "categories": ["finance", "utilities"],
+  "lang": "ko"
+}
