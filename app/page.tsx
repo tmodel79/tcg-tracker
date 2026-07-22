@@ -6,6 +6,7 @@ import { calcPortfolio } from '@/lib/calc'
 import { buildCsvBlob, downloadBlob, stamp } from '@/lib/utils'
 import { useI18n } from '@/lib/i18n'
 import { PortfolioSidebar } from '@/components/PortfolioSidebar'
+import { CollectionDashboard } from '@/components/CollectionDashboard'
 import { Controls } from '@/components/Controls'
 import { CardTable } from '@/components/CardTable'
 import { CardModal } from '@/components/CardModal'
@@ -169,18 +170,9 @@ export default function HomePage() {
           .app-shell { flex-direction: column; }
           .app-main { padding: 18px 16px 60px; }
         }
-        /* ── 컬렉션 탭: 헤더 (모바일 추가 버튼) ── */
-        .collection-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 16px;
-          gap: 10px;
-        }
-        .collection-header h2 { margin: 0; font-size: 18px; font-weight: 800; }
-        .mobile-add-btn { display: none; }
+        /* ── 컬렉션 탭: 헤더 (모바일) ── */
         @media (max-width: 860px) {
-          .mobile-add-btn { display: inline-flex !important; }
+          .app-main { padding: 16px 14px 60px; }
         }
       `}</style>
 
@@ -203,43 +195,38 @@ export default function HomePage() {
           {/* ── 탭: 내 컬렉션 ── */}
           {activeTab === 'collection' && (
             <>
-              <div className="collection-header">
-                <h2>🃏 내 컬렉션</h2>
-                <button
-                  className="mobile-add-btn"
-                  onClick={handleAddClick}
-                  style={{
-                    display: 'none',
-                    alignItems: 'center', gap: 6,
-                    padding: '8px 14px', borderRadius: 9,
-                    fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                    fontFamily: 'inherit',
-                    border: '1px solid var(--accent)',
-                    background: 'var(--accent)', color: 'var(--accent-ink)',
-                  }}
-                >
-                  + 추가
-                </button>
-              </div>
-              <Controls
+              {/* 대시보드 헤더 — 포트폴리오 요약 + 탑 퍼포머 */}
+              <CollectionDashboard
                 cards={cards}
-                filterGame={filterGame}
-                sortMode={sortMode}
-                onFilterChange={setFilterGame}
-                onSearchChange={setSearchText}
-                onSortChange={setSortMode}
-              />
-              <CardTable
-                cards={cards}
-                filterGame={filterGame}
-                searchText={searchText}
-                sortMode={sortMode}
-                onRowClick={handleRowClick}
+                summary={summary}
                 onAddClick={handleAddClick}
+                onSearchTab={() => setActiveTab('search')}
               />
-              <div style={{ color: 'var(--muted-2)', fontSize: 11.5, textAlign: 'center', marginTop: 22, lineHeight: 1.6 }}>
-                {t('footer_note')}<br />{t('footer_tip')}
-              </div>
+
+              {/* 필터 / 정렬 컨트롤 — 카드가 있을 때만 표시 */}
+              {cards.length > 0 && (
+                <>
+                  <Controls
+                    cards={cards}
+                    filterGame={filterGame}
+                    sortMode={sortMode}
+                    onFilterChange={setFilterGame}
+                    onSearchChange={setSearchText}
+                    onSortChange={setSortMode}
+                  />
+                  <CardTable
+                    cards={cards}
+                    filterGame={filterGame}
+                    searchText={searchText}
+                    sortMode={sortMode}
+                    onRowClick={handleRowClick}
+                    onAddClick={handleAddClick}
+                  />
+                  <div style={{ color: 'var(--muted-2)', fontSize: 11.5, textAlign: 'center', marginTop: 22, lineHeight: 1.6 }}>
+                    {t('footer_note')}<br />{t('footer_tip')}
+                  </div>
+                </>
+              )}
             </>
           )}
 
