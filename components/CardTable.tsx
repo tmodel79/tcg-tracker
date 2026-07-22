@@ -1,7 +1,7 @@
 'use client'
 
 import { calcCard } from '@/lib/calc'
-import { wonPlain, wonCompact, pctFmt, pctCompact } from '@/lib/utils'
+import { pctFmt, pctCompact } from '@/lib/utils'
 import { useI18n } from '@/lib/i18n'
 import type { Card, SortMode } from '@/types/card'
 
@@ -165,7 +165,7 @@ function Th({
 }
 
 function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
-  const { t } = useI18n()
+  const { t, fmt, fmtC } = useI18n()
   const k = calcCard(card)
   const dir = !k.hasNow ? 'flat' : k.pnl > 0 ? 'up' : k.pnl < 0 ? 'down' : 'flat'
   const rowCls = !k.hasNow ? 'r-flat' : k.pnl > 0 ? 'r-up' : k.pnl < 0 ? 'r-down' : 'r-flat'
@@ -270,10 +270,10 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
             </div>
             {/* 모바일 전용: 투자금 · 손익 인라인 압축 표시 */}
             <div className="mobile-sub" style={{ display: 'none', marginTop: 5, fontSize: 11.5, color: 'var(--muted)' }}>
-              <span>{t('mobile_invest')} {wonCompact(k.totalCost)}</span>
+              <span>{t('mobile_invest')} {fmtC(k.totalCost)}</span>
               {k.hasNow && (
                 <span className={`num ${dir}`} style={{ marginLeft: 8, fontWeight: 700 }}>
-                  {k.pnl >= 0 ? '+' : ''}{wonCompact(k.pnl)}
+                  {k.pnl >= 0 ? '+' : ''}{fmtC(Math.abs(k.pnl))}
                 </span>
               )}
             </div>
@@ -291,24 +291,24 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
 
       {/* 총원가 */}
       <td className="num hide-s data-td" style={tdStyle}>
-        <span className="num-full">{wonPlain(k.totalCost)}</span>
-        <span className="num-compact">{wonCompact(k.totalCost)}</span>
+        <span className="num-full">{fmt(k.totalCost)}</span>
+        <span className="num-compact">{fmtC(k.totalCost)}</span>
       </td>
 
       {/* 현재가 + 직전대비 */}
       <td className="data-td" style={tdStyle}>
         {k.hasNow ? (
           <>
-            <span className="num num-full">{wonPlain(k.now!)}</span>
-            <span className="num num-compact">{wonCompact(k.now!)}</span>
+            <span className="num num-full">{fmt(k.now!)}</span>
+            <span className="num num-compact">{fmtC(k.now!)}</span>
             {k.delta != null && k.delta !== 0 && (
               <div
                 className={`num ${k.delta > 0 ? 'up' : 'down'}`}
                 style={{ fontSize: 11, marginTop: 2 }}
               >
                 <span style={{ fontSize: 10 }}>{k.delta > 0 ? '▲' : '▼'}</span>{' '}
-                <span className="num-full">{wonPlain(Math.abs(k.delta))}</span>
-                <span className="num-compact">{wonCompact(Math.abs(k.delta))}</span>
+                <span className="num-full">{fmt(Math.abs(k.delta))}</span>
+                <span className="num-compact">{fmtC(Math.abs(k.delta))}</span>
               </div>
             )}
           </>
@@ -322,8 +322,8 @@ function CardRow({ card, onClick }: { card: Card; onClick: () => void }) {
         {k.hasNow ? (
           <span className={`num ${dir}`}>
             {k.pnl >= 0 ? '+' : ''}
-            <span className="num-full">{wonPlain(k.pnl)}</span>
-            <span className="num-compact">{wonCompact(k.pnl)}</span>
+            <span className="num-full">{fmt(Math.abs(k.pnl))}</span>
+            <span className="num-compact">{fmtC(Math.abs(k.pnl))}</span>
           </span>
         ) : (
           <span style={{ color: 'var(--muted-2)', fontSize: 12 }}>—</span>

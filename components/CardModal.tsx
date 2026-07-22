@@ -2,7 +2,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { won, numParse, todayISO } from '@/lib/utils'
+import { numParse, todayISO } from '@/lib/utils'
 import { uploadCardImage } from '@/lib/supabase'
 import { GAMES, FX_DEFAULT } from '@/types/card'
 import { useI18n } from '@/lib/i18n'
@@ -41,7 +41,7 @@ const fieldStyle: React.CSSProperties = {
 }
 
 export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalProps) {
-  const { t } = useI18n()
+  const { t, fmt } = useI18n()
 
   // 기본 필드
   const [name, setName] = useState('')
@@ -446,7 +446,7 @@ export function CardModal({ open, card, onClose, onSave, onDelete }: CardModalPr
           >
             <span style={{ color: 'var(--muted)', fontSize: 12, fontWeight: 600 }}>{t('total_cost_label')}</span>
             <span className="num" style={{ fontSize: 18, fontWeight: 800, color: 'var(--accent)' }}>
-              {won(totalCost)}
+              {fmt(totalCost)}
             </span>
           </div>
 
