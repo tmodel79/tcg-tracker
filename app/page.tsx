@@ -12,7 +12,7 @@ import { CardTable } from '@/components/CardTable'
 import { CardModal } from '@/components/CardModal'
 import { ImportModal } from '@/components/ImportModal'
 import { PriceSearch } from '@/components/PriceSearch'
-import { PurchaseImport } from '@/components/PurchaseImport'
+import { AddHub } from '@/components/AddHub'
 import { Toast } from '@/components/Toast'
 import type { Card, SortMode } from '@/types/card'
 import type { TabId } from '@/components/PortfolioSidebar'
@@ -23,7 +23,7 @@ export default function HomePage() {
   const { t } = useI18n()
 
   // ── 탭 상태 ──
-  const [activeTab, setActiveTab] = useState<TabId>('collection')
+  const [activeTab, setActiveTab] = useState<TabId>('dashboard')
 
   // ── 컬렉션 탭 UI 상태 ──
   const [filterGame, setFilterGame]   = useState('전체')
@@ -59,7 +59,7 @@ export default function HomePage() {
     }
   }
 
-  // ── 구매 가져오기 탭에서 카드 추가 ──
+  // ── 추가하기 탭에서 카드 추가 (URL/OCR 추출 결과 → 모달 프리필) ──
   const handleImportAddCard = (prefill: CardPrefill) => {
     setEditingCard(null)
     setCardPrefill(prefill)
@@ -177,66 +177,95 @@ export default function HomePage() {
       `}</style>
 
       <div className="app-shell">
-        {/* ── 좌측 사이드바 ── */}
+        {/* ── 좌측 사이드바 (내비게이션 + 설정 + 데이터 내보내기) ── */}
         <PortfolioSidebar
-          summary={summary}
           cards={cards}
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          onAddClick={handleAddClick}
           onCsvExport={handleCsvExport}
           onJsonBackup={handleJsonBackup}
-          onImportJson={() => setImportModalOpen(true)}
         />
 
         {/* ── 메인 컨텐츠 ── */}
         <main className="app-main">
 
-          {/* ── 탭: 내 컬렉션 ── */}
+          {/* ── 탭: 📊 대시보드 (요약·차트·탑퍼포머는 여기에만) ── */}
+          {activeTab === 'dashboard' && (
+            <CollectionDashboard
+              cards={cards}
+              summary={summary}
+              onAddClick={handleAddClick}
+              onSearchTab={() => setActiveTab('search')}
+            />
+          )}
+
+          {/* ── 탭: 🃏 내 컬렉션 (카드 그리드 + 필터만) ── */}
           {activeTab === 'collection' && (
-            <>
-              {/* 대시보드 헤더 — 포트폴리오 요약 + 탑 퍼포머 */}
+            cards.length > 0 ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+                  <div>
+                    <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, letterSpacing: '-0.02em' }}>
+                      🃏 {t('tab_collection')}
+                    </h2>
+                    <div style={{ fontSize: 11.5, color: 'var(--muted-2)', marginTop: 2 }}>
+                      {t('dash_sub', { total: summary.totalCards, priced: summary.pricedCards })}
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleAddClick}
+                    style={{
+                      padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 800,
+                      cursor: 'pointer', fontFamily: 'inherit',
+                      background: 'var(--accent)', color: 'var(--accent-ink)',
+                      border: '1px solid var(--accent)',
+                    }}
+                  >
+                    {t('btn_add_card')}
+                  </button>
+                </div>
+                <Controls
+                  cards={cards}
+                  filterGame={filterGame}
+                  sortMode={sortMode}
+                  onFilterChange={setFilterGame}
+                  onSearchChange={setSearchText}
+                  onSortChange={setSortMode}
+                />
+                <CardTable
+                  cards={cards}
+                  filterGame={filterGame}
+                  searchText={searchText}
+                  sortMode={sortMode}
+                  onRowClick={handleRowClick}
+                  onAddClick={handleAddClick}
+                />
+                <div style={{ color: 'var(--muted-2)', fontSize: 11.5, textAlign: 'center', marginTop: 22, lineHeight: 1.6 }}>
+                  {t('footer_note')}<br />{t('footer_tip')}
+                </div>
+              </>
+            ) : (
+              /* 카드가 없으면 대시보드의 히어로 안내 재사용 */
               <CollectionDashboard
                 cards={cards}
                 summary={summary}
                 onAddClick={handleAddClick}
                 onSearchTab={() => setActiveTab('search')}
               />
-
-              {/* 필터 / 정렬 컨트롤 — 카드가 있을 때만 표시 */}
-              {cards.length > 0 && (
-                <>
-                  <Controls
-                    cards={cards}
-                    filterGame={filterGame}
-                    sortMode={sortMode}
-                    onFilterChange={setFilterGame}
-                    onSearchChange={setSearchText}
-                    onSortChange={setSortMode}
-                  />
-                  <CardTable
-                    cards={cards}
-                    filterGame={filterGame}
-                    searchText={searchText}
-                    sortMode={sortMode}
-                    onRowClick={handleRowClick}
-                    onAddClick={handleAddClick}
-                  />
-                  <div style={{ color: 'var(--muted-2)', fontSize: 11.5, textAlign: 'center', marginTop: 22, lineHeight: 1.6 }}>
-                    {t('footer_note')}<br />{t('footer_tip')}
-                  </div>
-                </>
-              )}
-            </>
+            )
           )}
 
-          {/* ── 탭: 시세 검색 ── */}
+          {/* ── 탭: ➕ 추가하기 (직접입력 + URL/OCR + JSON 복원 통합) ── */}
+          {activeTab === 'add' && (
+            <AddHub
+              onManualAdd={handleAddClick}
+              onAddCard={handleImportAddCard}
+              onOpenJsonImport={() => setImportModalOpen(true)}
+            />
+          )}
+
+          {/* ── 탭: 🔍 시세 검색 ── */}
           {activeTab === 'search' && <PriceSearch />}
-
-          {/* ── 탭: 구매 가져오기 ── */}
-          {activeTab === 'import' && (
-            <PurchaseImport onAddCard={handleImportAddCard} />
-          )}
         </main>
       </div>
 
