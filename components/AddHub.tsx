@@ -11,6 +11,7 @@
 import { useI18n } from '@/lib/i18n'
 import { PurchaseImport } from './PurchaseImport'
 import type { CardPrefill } from './CardModal'
+import { IconPlus, IconEdit, IconLink, IconFolder, IconDownload } from './Icons'
 
 interface AddHubProps {
   onManualAdd: () => void
@@ -25,7 +26,10 @@ export function AddHub({ onManualAdd, onAddCard, onOpenJsonImport }: AddHubProps
     <div>
       {/* 제목 */}
       <div style={{ marginBottom: 20 }}>
-        <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800 }}>➕ {t('tab_add')}</h2>
+        <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconPlus size={18} strokeWidth={2.2} /></span>
+          {t('tab_add')}
+        </h2>
         <p style={{ margin: 0, color: 'var(--muted)', fontSize: 13 }}>
           {t('add_hub_subtitle')}
         </p>
@@ -39,7 +43,10 @@ export function AddHub({ onManualAdd, onAddCard, onOpenJsonImport }: AddHubProps
         gap: 12, flexWrap: 'wrap',
       }}>
         <div style={{ minWidth: 200, flex: 1 }}>
-          <div style={{ fontSize: 13.5, fontWeight: 800, marginBottom: 3 }}>✏️ {t('add_manual_title')}</div>
+          <div style={{ fontSize: 13.5, fontWeight: 800, marginBottom: 3, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconEdit size={14} /></span>
+            {t('add_manual_title')}
+          </div>
           <div style={{ fontSize: 12, color: 'var(--muted)' }}>
             {t('add_manual_desc')}
           </div>
@@ -59,7 +66,10 @@ export function AddHub({ onManualAdd, onAddCard, onOpenJsonImport }: AddHubProps
 
       {/* ② 자동 가져오기 — URL / 영수증 OCR */}
       <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 13.5, fontWeight: 800, marginBottom: 8 }}>🔗 {t('add_auto_title')}</div>
+        <div style={{ fontSize: 13.5, fontWeight: 800, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconLink size={14} /></span>
+          {t('add_auto_title')}
+        </div>
         <PurchaseImport embedded onAddCard={onAddCard} />
       </div>
 
@@ -71,7 +81,10 @@ export function AddHub({ onManualAdd, onAddCard, onOpenJsonImport }: AddHubProps
         gap: 12, flexWrap: 'wrap',
       }}>
         <div style={{ minWidth: 200, flex: 1 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 3 }}>📂 {t('add_json_title')}</div>
+          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 3, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconFolder size={14} /></span>
+            {t('add_json_title')}
+          </div>
           <div style={{ fontSize: 12, color: 'var(--muted)' }}>
             {t('add_json_desc')}
           </div>
@@ -83,9 +96,10 @@ export function AddHub({ onManualAdd, onAddCard, onOpenJsonImport }: AddHubProps
             cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0,
             border: '1px solid var(--border)', background: 'var(--panel)',
             color: 'var(--text)',
+            display: 'inline-flex', alignItems: 'center', gap: 6,
           }}
         >
-          📥 {t('add_json_btn')}
+          <IconDownload size={13} /> {t('add_json_btn')}
         </button>
       </div>
     </div>

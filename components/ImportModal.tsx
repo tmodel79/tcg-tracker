@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import type { Card } from '@/types/card'
 import { useI18n } from '@/lib/i18n'
+import { IconFolder } from './Icons'
 
 interface ImportModalProps {
   open: boolean
@@ -114,7 +115,7 @@ export function ImportModal({ open, onClose, onImport }: ImportModalProps) {
             ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
           }}
         >
-          <div style={{ fontSize: 32, marginBottom: 8 }}>📂</div>
+          <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'center', color: 'var(--muted)' }}><IconFolder size={30} strokeWidth={1.6} /></div>
           <div>
             <b style={{ color: 'var(--text)' }}>{t('import_drop')}</b>
             <br />

@@ -7,6 +7,7 @@
 import { useState } from 'react'
 import { GAMES } from '@/types/card'
 import type { Game, Language } from '@/types/card'
+import { IconSearch, IconStar } from './Icons'
 
 const LANGUAGES: { value: Language; label: string; flag: string }[] = [
   { value: 'JP', label: '일판', flag: '🇯🇵' },
@@ -84,7 +85,10 @@ export function PriceSearch() {
     <div>
       {/* 제목 */}
       <div style={{ marginBottom: 20 }}>
-        <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800 }}>🔍 시세 검색</h2>
+        <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconSearch size={17} strokeWidth={2.2} /></span>
+          시세 검색
+        </h2>
         <p style={{ margin: 0, color: 'var(--muted)', fontSize: 13 }}>
           카드명을 검색하면 eBay·TCGPlayer·130point·KREAM·번개장터 가격을 한눈에 비교합니다
         </p>
@@ -177,7 +181,7 @@ export function PriceSearch() {
             transition: 'all 0.15s',
           }}
         >
-          {loading ? '⏳ 검색 중…' : '🔍 시세 검색'}
+          {loading ? '검색 중…' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, justifyContent: 'center', width: '100%' }}><IconSearch size={14} /> 시세 검색</span>}
         </button>
 
         {error && (
@@ -200,7 +204,7 @@ export function PriceSearch() {
               alignItems: 'center',
               gap: 8,
             }}>
-              <span style={{ fontSize: 18 }}>🏆</span>
+              <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconStar size={17} /></span>
               <div>
                 <div style={{ fontSize: 11.5, color: 'var(--accent)', fontWeight: 700 }}>최저가</div>
                 <div className="num" style={{ fontSize: 20, fontWeight: 800, color: 'var(--accent)' }}>

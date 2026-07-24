@@ -570,7 +570,7 @@ export function CardModal({ open, card, prefill, onClose, onSave, onDelete }: Ca
                   transition: 'all 0.15s',
                 }}
               >
-                {priceLoading ? '⏳ 조회 중...' : '🔍 시세 조회하기'}
+                {priceLoading ? '조회 중…' : '시세 조회하기'}
               </button>
               {!language && name.trim() && (
                 <p style={{ color: 'var(--muted)', fontSize: 11.5, marginTop: 5, textAlign: 'center' }}>

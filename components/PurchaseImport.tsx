@@ -10,6 +10,7 @@
 
 import { useRef, useState } from 'react'
 import type { Currency, Game, Language } from '@/types/card'
+import { IconLink, IconCamera, IconEdit, IconFolder, IconDownload } from './Icons'
 
 export interface ImportedData {
   name: string | null
@@ -144,7 +145,10 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
       {/* 제목 (단독 사용 시에만) */}
       {!embedded && (
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800 }}>🔗 구매 가져오기</h2>
+          <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconLink size={16} /></span>
+            구매 가져오기
+          </h2>
           <p style={{ margin: 0, color: 'var(--muted)', fontSize: 13 }}>
             구매한 상품 URL을 붙여넣거나, 영수증 스크린샷을 올리면 자동으로 정보를 추출합니다
           </p>
@@ -154,8 +158,8 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
       {/* 모드 전환 탭 */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 16, background: 'var(--panel-2)', borderRadius: 10, padding: 4 }}>
         {[
-          { id: 'url' as Mode,        label: '🔗 URL 붙여넣기' },
-          { id: 'screenshot' as Mode, label: '📸 영수증 스캔' },
+          { id: 'url' as Mode,        label: 'URL 붙여넣기', Icon: IconLink },
+          { id: 'screenshot' as Mode, label: '영수증 스캔',  Icon: IconCamera },
         ].map(m => (
           <button
             key={m.id}
@@ -168,7 +172,9 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
               boxShadow: mode === m.id ? '0 1px 4px rgba(0,0,0,0.15)' : 'none',
             }}
           >
-            {m.label}
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
+              <m.Icon size={13} /> {m.label}
+            </span>
           </button>
         ))}
       </div>
@@ -201,7 +207,7 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
                 color: loading || !url.trim() ? 'var(--muted)' : 'var(--accent-ink)',
               }}
             >
-              {loading ? '⏳' : '가져오기'}
+              {loading ? '…' : '가져오기'}
             </button>
           </div>
           <p style={{ fontSize: 11.5, color: 'var(--muted-2)', marginTop: 8, marginBottom: 0 }}>
@@ -262,7 +268,7 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
                 if (f) handleFileSelect(f)
               }}
             >
-              <div style={{ fontSize: 32, marginBottom: 8 }}>📷</div>
+              <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'center', color: 'var(--muted)' }}><IconCamera size={30} strokeWidth={1.6} /></div>
               <div style={{ fontWeight: 700, marginBottom: 4 }}>스크린샷을 여기에 드래그하거나 클릭하세요</div>
               <div style={{ fontSize: 12, color: 'var(--muted-2)' }}>
                 eBay 주문확인 · 야후옥션 낙찰통보 · 메르카리 구매완료 등
@@ -281,7 +287,7 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
               color: loading ? 'var(--muted)' : 'var(--text)',
             }}
           >
-            {ocrPreview ? '다른 이미지 선택' : '📁 이미지 파일 선택'}
+            {ocrPreview ? '다른 이미지 선택' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, justifyContent: 'center', width: '100%' }}><IconFolder size={13} /> 이미지 파일 선택</span>}
           </button>
 
           <p style={{ fontSize: 11.5, color: 'var(--muted-2)', marginTop: 8, marginBottom: 0 }}>
@@ -350,7 +356,9 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
               color: 'var(--accent-ink)', cursor: 'pointer', fontFamily: 'inherit',
             }}
           >
-            📥 이 카드 추가하기
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, justifyContent: 'center', width: '100%' }}>
+              <IconDownload size={14} /> 이 카드 추가하기
+            </span>
           </button>
         </div>
       )}
@@ -361,7 +369,7 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
         background: 'var(--panel-2)', border: '1px solid var(--border)',
         borderRadius: 12, padding: '14px 16px',
       }}>
-        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>✏️ 직접 수동 입력</div>
+        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}><IconEdit size={13} /> 직접 수동 입력</div>
         <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 10 }}>
           지원하지 않는 사이트거나 직접 입력하고 싶으시면 카드 추가 버튼을 사용하세요.
           수수료·배대지·배송비도 모두 직접 입력 가능합니다.

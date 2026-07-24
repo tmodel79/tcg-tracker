@@ -7,6 +7,7 @@ import { CurrencySelector } from './CurrencySelector'
 import { ThemeSelector } from './ThemeSelector'
 import type { Card } from '@/types/card'
 import { GAMES } from '@/types/card'
+import { IconDashboard, IconCards, IconPlus, IconSearch, IconSave, IconTable } from './Icons'
 
 const GAME_COLORS: Record<string, string> = {
   '원피스': '#e84040',
@@ -18,10 +19,10 @@ const GAME_COLORS: Record<string, string> = {
 }
 
 export const TABS = [
-  { id: 'dashboard',  labelKey: 'tab_dashboard',  icon: '📊' },
-  { id: 'collection', labelKey: 'tab_collection', icon: '🃏' },
-  { id: 'add',        labelKey: 'tab_add',        icon: '➕' },
-  { id: 'search',     labelKey: 'tab_search',     icon: '🔍' },
+  { id: 'dashboard',  labelKey: 'tab_dashboard',  Icon: IconDashboard },
+  { id: 'collection', labelKey: 'tab_collection', Icon: IconCards },
+  { id: 'add',        labelKey: 'tab_add',        Icon: IconPlus },
+  { id: 'search',     labelKey: 'tab_search',     Icon: IconSearch },
 ] as const
 
 export type TabId = typeof TABS[number]['id']
@@ -105,7 +106,7 @@ export function PortfolioSidebar({
           background: var(--panel-2);
           color: var(--text);
         }
-        .ps-tab .tab-icon { font-size: 14px; width: 18px; text-align: center; }
+        .ps-tab .tab-icon { width: 18px; display: inline-flex; align-items: center; justify-content: center; }
         /* ── 액션 버튼 ── */
         .ps-action {
           width: 100%;
@@ -193,18 +194,18 @@ export function PortfolioSidebar({
       <aside className="ps-root">
         <div className="ps-inner">
 
-          {/* ── 로고 + 설정 ── */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          {/* ── 로고 (1줄) + 설정 (2줄) — 잘림 방지 ── */}
+          <div style={{ marginBottom: 16 }}>
             <h1
               onClick={() => onTabChange('dashboard')}
               style={{
-                margin: 0, fontSize: 15, fontWeight: 800, letterSpacing: '-0.02em',
-                display: 'flex', alignItems: 'center', gap: 7,
+                margin: '0 0 10px', fontSize: 16, fontWeight: 800, letterSpacing: '-0.02em',
+                display: 'flex', alignItems: 'center', gap: 8,
                 cursor: 'pointer', userSelect: 'none',
               }}
             >
               <span style={{
-                width: 7, height: 7, borderRadius: '50%',
+                width: 8, height: 8, borderRadius: '50%',
                 background: 'var(--accent)', boxShadow: '0 0 10px var(--accent)',
                 display: 'inline-block',
               }} />
@@ -226,7 +227,7 @@ export function PortfolioSidebar({
                 className={`ps-tab${activeTab === tab.id ? ' active' : ''}`}
                 onClick={() => onTabChange(tab.id)}
               >
-                <span className="tab-icon">{tab.icon}</span>
+                <span className="tab-icon"><tab.Icon size={15} strokeWidth={2.2} /></span>
                 {t(tab.labelKey)}
               </button>
             ))}
@@ -261,8 +262,9 @@ export function PortfolioSidebar({
                 key={tab.id}
                 className={`ps-mobile-tab${activeTab === tab.id ? ' active' : ''}`}
                 onClick={() => onTabChange(tab.id)}
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
               >
-                {tab.icon} {t(tab.labelKey)}
+                <tab.Icon size={13} strokeWidth={2.2} /> {t(tab.labelKey)}
               </button>
             ))}
           </div>
@@ -274,8 +276,8 @@ export function PortfolioSidebar({
           <div className="ps-desktop-only" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <p className="ps-section-title" style={{ margin: '0 0 2px' }}>{t('sidebar_data')}</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
-              <button className="ps-action" onClick={onJsonBackup}>💾 {t('sidebar_backup')}</button>
-              <button className="ps-action" onClick={onCsvExport}>📊 CSV</button>
+              <button className="ps-action" onClick={onJsonBackup}><IconSave size={13} /> {t('sidebar_backup')}</button>
+              <button className="ps-action" onClick={onCsvExport}><IconTable size={13} /> CSV</button>
             </div>
           </div>
 

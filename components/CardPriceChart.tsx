@@ -80,7 +80,7 @@ export function CardPriceChart({ cardId, totalCostKrw }: CardPriceChartProps) {
       lineHeight: 1.6,
     }}>
       시세 기록이 없습니다.<br />
-      <span style={{ fontSize: 11 }}>현재가 저장 후 메인화면 📌 기록 버튼을 누르면 차트가 생성됩니다.</span>
+      <span style={{ fontSize: 11 }}>현재가 저장 후 메인화면의 기록 버튼을 누르면 차트가 생성됩니다.</span>
     </div>
   )
 

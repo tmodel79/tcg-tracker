@@ -10,6 +10,7 @@ import {
   XAxis, YAxis, Tooltip, CartesianGrid,
 } from 'recharts'
 import { useI18n } from '@/lib/i18n'
+import { IconPin } from './Icons'
 import { calcPortfolio } from '@/lib/calc'
 import type { Card } from '@/types/card'
 
@@ -191,7 +192,7 @@ export function PortfolioChart({ cards, onSaveSnapshot }: PortfolioChartProps) {
             whiteSpace: 'nowrap',
           }}
         >
-          {saving ? '저장 중…' : '📌 기록'}
+          {saving ? '저장 중…' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><IconPin size={11} /> 기록</span>}
         </button>
       </div>
 
@@ -249,8 +250,8 @@ export function PortfolioChart({ cards, onSaveSnapshot }: PortfolioChartProps) {
         }}>
           <div style={{ fontSize: 12, color: 'var(--muted-2)' }}>
             {summary.pricedCards === 0
-              ? '카드에 현재가를 입력한 뒤 📌 기록 버튼을 누르세요'
-              : '📌 기록 버튼을 눌러 첫 데이터를 저장하세요'}
+              ? '카드에 현재가를 입력한 뒤 기록 버튼을 누르세요'
+              : '기록 버튼을 눌러 첫 데이터를 저장하세요'}
           </div>
           <div style={{ fontSize: 10.5, color: 'var(--muted-2)', opacity: 0.6 }}>
             기록이 쌓이면 시세 변화 차트가 표시됩니다

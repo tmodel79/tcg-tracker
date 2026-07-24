@@ -12,6 +12,7 @@ import type { Card, PortfolioSummary } from '@/types/card'
 import { GAMES } from '@/types/card'
 import { PortfolioChart } from './PortfolioChart'
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts'
+import { IconDashboard, IconCards, IconSearch, IconTrendUp, IconTrendDown, IconGlobe } from './Icons'
 
 const GAME_COLORS: Record<string, string> = {
   '원피스': '#e84040',
@@ -129,7 +130,9 @@ export function CollectionDashboard({
           }
         `}</style>
         <div className="cdb-hero">
-          <div style={{ fontSize: 44, marginBottom: 12 }}>🃏</div>
+          <div style={{ marginBottom: 14, display: 'flex', justifyContent: 'center', color: 'var(--accent)' }}>
+            <IconCards size={40} strokeWidth={1.6} />
+          </div>
           <h2 style={{
             margin: '0 0 8px', fontSize: 26, fontWeight: 900,
             letterSpacing: '-0.03em', lineHeight: 1.2,
@@ -163,20 +166,21 @@ export function CollectionDashboard({
                 cursor: 'pointer', fontFamily: 'inherit',
                 background: 'transparent', color: 'var(--text)',
                 border: '1px solid var(--border)',
+                display: 'inline-flex', alignItems: 'center', gap: 7,
               }}
             >
-              🔍 시세 검색해보기
+              <IconSearch size={14} /> 시세 검색해보기
             </button>
           </div>
 
           <div className="cdb-feature-grid">
             {[
-              { icon: '📊', title: '실시간 시세 조회', desc: 'eBay · TCGPlayer · Cardmarket · 130point · Yahoo JP · Mercari 동시 검색' },
-              { icon: '📈', title: '포트폴리오 차트', desc: '내 컬렉션의 가치 변화를 날짜별로 기록하고 시각화합니다' },
-              { icon: '🌍', title: '글로벌 멀티 통화', desc: '한국·미국·일본·유럽 — 원하는 통화로 자동 환산' },
+              { Icon: IconSearch,  title: '실시간 시세 조회', desc: 'eBay · TCGPlayer · Cardmarket · 130point · Yahoo JP · Mercari 동시 검색' },
+              { Icon: IconTrendUp, title: '포트폴리오 차트', desc: '내 컬렉션의 가치 변화를 날짜별로 기록하고 시각화합니다' },
+              { Icon: IconGlobe,   title: '글로벌 멀티 통화', desc: '한국·미국·일본·유럽 — 원하는 통화로 자동 환산' },
             ].map(f => (
               <div key={f.title} className="cdb-feature">
-                <div style={{ fontSize: 22, marginBottom: 8 }}>{f.icon}</div>
+                <div style={{ marginBottom: 10, color: 'var(--accent)' }}><f.Icon size={20} strokeWidth={1.8} /></div>
                 <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 4, color: 'var(--text)' }}>{f.title}</div>
                 <div style={{ fontSize: 11.5, color: 'var(--muted)', lineHeight: 1.55 }}>{f.desc}</div>
               </div>
@@ -249,8 +253,9 @@ export function CollectionDashboard({
       {/* 헤더 액션 바 */}
       <div className="cdb-action-bar">
         <div>
-          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, letterSpacing: '-0.02em' }}>
-            📊 {t('tab_dashboard')}
+          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconDashboard size={19} strokeWidth={2.4} /></span>
+            {t('tab_dashboard')}
           </h2>
           <div style={{ fontSize: 11.5, color: 'var(--muted-2)', marginTop: 2 }}>
             {t('dash_sub', { total: totalCards, priced: pricedCards })}
@@ -264,9 +269,10 @@ export function CollectionDashboard({
               cursor: 'pointer', fontFamily: 'inherit',
               background: 'var(--panel-2)', color: 'var(--muted)',
               border: '1px solid var(--border)',
+              display: 'inline-flex', alignItems: 'center', gap: 6,
             }}
           >
-            🔍 {t('tab_search')}
+            <IconSearch size={13} /> {t('tab_search')}
           </button>
           <button
             onClick={onAddClick}
@@ -327,7 +333,7 @@ export function CollectionDashboard({
       {pricedList.length >= 2 && topCard && worstCard && (
         <div className="cdb-bottom">
           <PerformerCard
-            label="🏆 Best Performer"
+            label="Best Performer"
             card={topCard.card}
             calc={topCard.calc}
             isGain
@@ -335,7 +341,7 @@ export function CollectionDashboard({
             locale={locale}
           />
           <PerformerCard
-            label="📉 Needs Attention"
+            label="Needs Attention"
             card={worstCard.card}
             calc={worstCard.calc}
             isGain={false}
@@ -347,7 +353,7 @@ export function CollectionDashboard({
       {pricedList.length === 1 && topCard && (
         <div className="cdb-bottom">
           <PerformerCard
-            label="📌 평가된 카드"
+            label="평가된 카드"
             card={topCard.card}
             calc={topCard.calc}
             isGain={topCard.calc.pnl >= 0}
@@ -382,7 +388,7 @@ export function CollectionDashboard({
           fontSize: 12.5,
         }}>
           <span style={{ fontSize: 20 }}>💡</span>
-          <span>카드 편집에서 <strong style={{ color: 'var(--text)' }}>현재가</strong>를 입력하거나 <strong style={{ color: 'var(--text)' }}>🔍 시세 검색</strong>으로 현재 시세를 가져오면 손익이 계산됩니다.</span>
+          <span>카드 편집에서 <strong style={{ color: 'var(--text)' }}>현재가</strong>를 입력하거나 <strong style={{ color: 'var(--text)' }}>시세 검색</strong>으로 현재 시세를 가져오면 손익이 계산됩니다.</span>
         </div>
       )}
     </div>
@@ -513,7 +519,10 @@ function PerformerCard({
         }}>🃏</div>
       )}
       <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--muted-2)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 3 }}>
+        <div style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--muted-2)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ color, display: 'inline-flex' }}>
+            {isGain ? <IconTrendUp size={11} strokeWidth={2.4} /> : <IconTrendDown size={11} strokeWidth={2.4} />}
+          </span>
           {label}
         </div>
         <div style={{
