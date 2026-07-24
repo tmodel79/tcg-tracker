@@ -25,6 +25,8 @@ export interface ImportedData {
 }
 
 interface PurchaseImportProps {
+  /** 추가하기 탭 안에 내장될 때 true — 자체 제목·수동입력 안내를 숨김 */
+  embedded?: boolean
   onAddCard: (prefill: {
     name?: string
     cardNumber?: string
@@ -56,7 +58,7 @@ const fieldStyle: React.CSSProperties = {
 
 const FX_DEFAULT: Record<string, number> = { KRW: 1, USD: 1380, JPY: 9.1, EUR: 1500 }
 
-export function PurchaseImport({ onAddCard }: PurchaseImportProps) {
+export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportProps) {
   const [mode, setMode]           = useState<Mode>('url')
   const [url, setUrl]             = useState('')
   const [loading, setLoading]     = useState(false)
@@ -139,13 +141,15 @@ export function PurchaseImport({ onAddCard }: PurchaseImportProps) {
 
   return (
     <div>
-      {/* 제목 */}
-      <div style={{ marginBottom: 20 }}>
-        <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800 }}>🔗 구매 가져오기</h2>
-        <p style={{ margin: 0, color: 'var(--muted)', fontSize: 13 }}>
-          구매한 상품 URL을 붙여넣거나, 영수증 스크린샷을 올리면 자동으로 정보를 추출합니다
-        </p>
-      </div>
+      {/* 제목 (단독 사용 시에만) */}
+      {!embedded && (
+        <div style={{ marginBottom: 20 }}>
+          <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800 }}>🔗 구매 가져오기</h2>
+          <p style={{ margin: 0, color: 'var(--muted)', fontSize: 13 }}>
+            구매한 상품 URL을 붙여넣거나, 영수증 스크린샷을 올리면 자동으로 정보를 추출합니다
+          </p>
+        </div>
+      )}
 
       {/* 모드 전환 탭 */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 16, background: 'var(--panel-2)', borderRadius: 10, padding: 4 }}>
@@ -351,7 +355,8 @@ export function PurchaseImport({ onAddCard }: PurchaseImportProps) {
         </div>
       )}
 
-      {/* ── 수동 입력 안내 ── */}
+      {/* ── 수동 입력 안내 (단독 사용 시에만 — 추가하기 탭에는 별도 섹션 존재) ── */}
+      {!embedded && (
       <div style={{
         background: 'var(--panel-2)', border: '1px solid var(--border)',
         borderRadius: 12, padding: '14px 16px',
@@ -372,6 +377,7 @@ export function PurchaseImport({ onAddCard }: PurchaseImportProps) {
           + 카드 직접 추가
         </button>
       </div>
+      )}
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>

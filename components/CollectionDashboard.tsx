@@ -1,14 +1,15 @@
 'use client'
 
 // ========================================
-// CollectionDashboard
-// 컬렉션 탭 상단 대시보드 — 포트폴리오 요약 + 탑 퍼포머 + 빠른 액션
+// CollectionDashboard — 📊 대시보드 탭
+// 포트폴리오 요약 + 가치 차트 + 탑 퍼포머 (요약 정보는 여기에만 표시)
 // ========================================
 
 import { calcCard } from '@/lib/calc'
 import { useI18n } from '@/lib/i18n'
 import { pctCompact } from '@/lib/utils'
 import type { Card, PortfolioSummary } from '@/types/card'
+import { PortfolioChart } from './PortfolioChart'
 
 interface CollectionDashboardProps {
   cards: Card[]
@@ -45,7 +46,7 @@ function MiniStatCard({
 export function CollectionDashboard({
   cards, summary, onAddClick, onSearchTab,
 }: CollectionDashboardProps) {
-  const { fmtC, locale } = useI18n()
+  const { fmtC, locale, t } = useI18n()
   const { invest, value, pnl, pct, totalCards, pricedCards } = summary
 
   const isGain = pnl > 0
@@ -232,10 +233,10 @@ export function CollectionDashboard({
       <div className="cdb-action-bar">
         <div>
           <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, letterSpacing: '-0.02em' }}>
-            내 컬렉션
+            📊 {t('tab_dashboard')}
           </h2>
           <div style={{ fontSize: 11.5, color: 'var(--muted-2)', marginTop: 2 }}>
-            총 {totalCards}장 · 평가된 카드 {pricedCards}장
+            {t('dash_sub', { total: totalCards, priced: pricedCards })}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 7 }}>
@@ -248,7 +249,7 @@ export function CollectionDashboard({
               border: '1px solid var(--border)',
             }}
           >
-            🔍 시세 검색
+            🔍 {t('tab_search')}
           </button>
           <button
             onClick={onAddClick}
@@ -259,7 +260,7 @@ export function CollectionDashboard({
               border: '1px solid var(--accent)',
             }}
           >
-            + 카드 추가
+            {t('btn_add_card')}
           </button>
         </div>
       </div>
@@ -296,6 +297,9 @@ export function CollectionDashboard({
           sub={pricedCards > 0 ? '전체 평균' : undefined}
         />
       </div>
+
+      {/* 포트폴리오 가치 차트 (사이드바에서 이동) */}
+      <PortfolioChart cards={cards} />
 
       {/* 탑 퍼포머 / 워스트 퍼포머 */}
       {pricedList.length >= 2 && topCard && worstCard && (

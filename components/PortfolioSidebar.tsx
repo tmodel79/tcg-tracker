@@ -1,14 +1,12 @@
 'use client'
 
 import { calcCard } from '@/lib/calc'
-import { pctCompact } from '@/lib/utils'
 import { useI18n } from '@/lib/i18n'
 import { LangSelector } from './LangSelector'
 import { CurrencySelector } from './CurrencySelector'
 import { ThemeSelector } from './ThemeSelector'
-import type { Card, PortfolioSummary } from '@/types/card'
+import type { Card } from '@/types/card'
 import { GAMES } from '@/types/card'
-import { PortfolioChart } from './PortfolioChart'
 
 const GAME_COLORS: Record<string, string> = {
   '원피스': '#e84040',
@@ -20,33 +18,27 @@ const GAME_COLORS: Record<string, string> = {
 }
 
 export const TABS = [
-  { id: 'collection', label: '내 컬렉션', icon: '🃏' },
-  { id: 'search',     label: '시세 검색',  icon: '🔍' },
-  { id: 'import',     label: '구매 가져오기', icon: '🔗' },
+  { id: 'dashboard',  labelKey: 'tab_dashboard',  icon: '📊' },
+  { id: 'collection', labelKey: 'tab_collection', icon: '🃏' },
+  { id: 'add',        labelKey: 'tab_add',        icon: '➕' },
+  { id: 'search',     labelKey: 'tab_search',     icon: '🔍' },
 ] as const
 
 export type TabId = typeof TABS[number]['id']
 
 interface PortfolioSidebarProps {
-  summary: PortfolioSummary
   cards: Card[]
   activeTab: TabId
   onTabChange: (tab: TabId) => void
-  onAddClick: () => void
   onCsvExport: () => void
   onJsonBackup: () => void
-  onImportJson: () => void
 }
 
 export function PortfolioSidebar({
-  summary, cards, activeTab, onTabChange,
-  onAddClick, onCsvExport, onJsonBackup, onImportJson,
+  cards, activeTab, onTabChange,
+  onCsvExport, onJsonBackup,
 }: PortfolioSidebarProps) {
-  const { fmtC, locale } = useI18n()
-  const { invest, value, pnl, pct, totalCards, pricedCards } = summary
-  const isGain = pnl > 0
-  const isLoss = pnl < 0
-  const pctColor = isGain ? 'var(--gain)' : isLoss ? 'var(--loss)' : 'var(--flat)'
+  const { t } = useI18n()
 
   // 게임별 투자 비중
   const gameData = GAMES
@@ -204,7 +196,7 @@ export function PortfolioSidebar({
           {/* ── 로고 + 설정 ── */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <h1
-              onClick={() => onTabChange('collection')}
+              onClick={() => onTabChange('dashboard')}
               style={{
                 margin: 0, fontSize: 15, fontWeight: 800, letterSpacing: '-0.02em',
                 display: 'flex', alignItems: 'center', gap: 7,
@@ -225,44 +217,25 @@ export function PortfolioSidebar({
             </div>
           </div>
 
-          {/* ── 포트폴리오 요약 ── */}
-          <div style={{
-            background: 'var(--panel-2)',
-            border: '1px solid var(--border)',
-            borderRadius: 12,
-            padding: '13px 13px 12px',
-            marginBottom: 14,
-          }}>
-            <p className="ps-section-title" style={{ color: 'var(--accent)' }}>포트폴리오</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 8px' }}>
-              <StatItem label="총 투자" sub={`${totalCards}개`}>
-                <span className="num" style={{ fontSize: 17, fontWeight: 800 }}>{fmtC(invest)}</span>
-              </StatItem>
-              <StatItem label="현재 가치" sub={`${pricedCards}개 평가`}>
-                <span className="num" style={{ fontSize: 17, fontWeight: 800 }}>{fmtC(value)}</span>
-              </StatItem>
-              <StatItem label="총 손익">
-                <span className="num" style={{ fontSize: 17, fontWeight: 800, color: pctColor }}>
-                  {pnl >= 0 ? '+' : '−'}{fmtC(Math.abs(pnl))}
-                </span>
-              </StatItem>
-              <StatItem label="수익률">
-                <span className="num" style={{ fontSize: 21, fontWeight: 800, color: pctColor }}>
-                  {pctCompact(pct, locale)}
-                </span>
-              </StatItem>
-            </div>
-          </div>
-
-          {/* ── 포트폴리오 가치 차트 ── */}
-          <div className="ps-desktop-only">
-            <PortfolioChart cards={cards} />
+          {/* ── 메뉴 탭 (데스크탑) ── */}
+          <div className="ps-desktop-only" style={{ marginBottom: 14 }}>
+            <p className="ps-section-title">{t('sidebar_menu')}</p>
+            {TABS.map(tab => (
+              <button
+                key={tab.id}
+                className={`ps-tab${activeTab === tab.id ? ' active' : ''}`}
+                onClick={() => onTabChange(tab.id)}
+              >
+                <span className="tab-icon">{tab.icon}</span>
+                {t(tab.labelKey)}
+              </button>
+            ))}
           </div>
 
           {/* ── 게임별 투자 ── */}
           {gameData.length > 0 && (
             <div className="ps-desktop-only" style={{ marginBottom: 14 }}>
-              <p className="ps-section-title">게임별 투자</p>
+              <p className="ps-section-title">{t('sidebar_games')}</p>
               {gameData.map(g => (
                 <div key={g.game} className="ps-game-row">
                   <span className="ps-game-label">{g.game.slice(0, 3)}</span>
@@ -281,21 +254,6 @@ export function PortfolioSidebar({
             </div>
           )}
 
-          {/* ── 메뉴 탭 (데스크탑) ── */}
-          <div className="ps-desktop-only" style={{ marginBottom: 14 }}>
-            <p className="ps-section-title">메뉴</p>
-            {TABS.map(tab => (
-              <button
-                key={tab.id}
-                className={`ps-tab${activeTab === tab.id ? ' active' : ''}`}
-                onClick={() => onTabChange(tab.id)}
-              >
-                <span className="tab-icon">{tab.icon}</span>
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
           {/* ── 모바일 탭 (하단 배너) ── */}
           <div className="ps-mobile-tabs">
             {TABS.map(tab => (
@@ -304,7 +262,7 @@ export function PortfolioSidebar({
                 className={`ps-mobile-tab${activeTab === tab.id ? ' active' : ''}`}
                 onClick={() => onTabChange(tab.id)}
               >
-                {tab.icon} {tab.label}
+                {tab.icon} {t(tab.labelKey)}
               </button>
             ))}
           </div>
@@ -312,40 +270,17 @@ export function PortfolioSidebar({
           {/* ── 여백 ── */}
           <div style={{ flex: 1 }} className="ps-desktop-only" />
 
-          {/* ── 액션 버튼 ── */}
+          {/* ── 데이터 내보내기 ── */}
           <div className="ps-desktop-only" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <button
-              onClick={onAddClick}
-              style={{
-                width: '100%', padding: '9px 12px', borderRadius: 9,
-                fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-                border: '1px solid var(--accent)', background: 'var(--accent)',
-                color: 'var(--accent-ink)', textAlign: 'center',
-              }}
-            >
-              + 카드 추가
-            </button>
+            <p className="ps-section-title" style={{ margin: '0 0 2px' }}>{t('sidebar_data')}</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
-              <button className="ps-action" onClick={onImportJson}>📥 JSON 가져오기</button>
-              <button className="ps-action" onClick={onJsonBackup}>💾 백업</button>
+              <button className="ps-action" onClick={onJsonBackup}>💾 {t('sidebar_backup')}</button>
+              <button className="ps-action" onClick={onCsvExport}>📊 CSV</button>
             </div>
-            <button className="ps-action" onClick={onCsvExport}>📊 CSV 내보내기</button>
           </div>
 
         </div>
       </aside>
     </>
-  )
-}
-
-function StatItem({ label, sub, children }: { label: string; sub?: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--muted-2)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>
-        {label}
-      </div>
-      {children}
-      {sub && <div style={{ fontSize: 10, color: 'var(--muted-2)', marginTop: 1 }}>{sub}</div>}
-    </div>
   )
 }
