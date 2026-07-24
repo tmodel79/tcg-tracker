@@ -1,13 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import { calcCard } from '@/lib/calc'
 import { useI18n } from '@/lib/i18n'
-import { LangSelector } from './LangSelector'
-import { CurrencySelector } from './CurrencySelector'
-import { ThemeSelector } from './ThemeSelector'
+import { SettingsModal } from './SettingsModal'
 import type { Card } from '@/types/card'
 import { GAMES } from '@/types/card'
-import { IconDashboard, IconCards, IconPlus, IconSearch, IconSave, IconTable } from './Icons'
+import { IconDashboard, IconCards, IconPlus, IconSearch, IconSave, IconTable, IconSettings } from './Icons'
 
 const GAME_COLORS: Record<string, string> = {
   '원피스': '#e84040',
@@ -40,6 +39,7 @@ export function PortfolioSidebar({
   onCsvExport, onJsonBackup,
 }: PortfolioSidebarProps) {
   const { t } = useI18n()
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   // 게임별 투자 비중
   const gameData = GAMES
@@ -126,6 +126,8 @@ export function PortfolioSidebar({
           gap: 5px;
         }
         .ps-action:hover { color: var(--text); border-color: var(--muted); }
+        /* ── 설정 버튼 ── */
+        .ps-settings-btn:hover { color: var(--text) !important; border-color: var(--muted) !important; }
         /* ── 게임 바 ── */
         .ps-game-row { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
         .ps-game-label { font-size: 11px; color: var(--muted); width: 36px; flex-shrink: 0; }
@@ -194,12 +196,12 @@ export function PortfolioSidebar({
       <aside className="ps-root">
         <div className="ps-inner">
 
-          {/* ── 로고 (1줄) + 설정 (2줄) — 잘림 방지 ── */}
-          <div style={{ marginBottom: 16 }}>
+          {/* ── 로고 + 설정 버튼 (언어·통화·테마는 설정 모달로 통합) ── */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <h1
               onClick={() => onTabChange('dashboard')}
               style={{
-                margin: '0 0 10px', fontSize: 16, fontWeight: 800, letterSpacing: '-0.02em',
+                margin: 0, fontSize: 16, fontWeight: 800, letterSpacing: '-0.02em',
                 display: 'flex', alignItems: 'center', gap: 8,
                 cursor: 'pointer', userSelect: 'none',
               }}
@@ -211,11 +213,20 @@ export function PortfolioSidebar({
               }} />
               CardLedger
             </h1>
-            <div style={{ display: 'flex', gap: 4 }}>
-              <LangSelector />
-              <CurrencySelector />
-              <ThemeSelector />
-            </div>
+            <button
+              onClick={() => setSettingsOpen(true)}
+              title={t('settings_title')}
+              aria-label={t('settings_title')}
+              className="ps-settings-btn"
+              style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+                background: 'transparent', border: '1px solid var(--border)',
+                color: 'var(--muted)', cursor: 'pointer', transition: 'all 0.12s',
+              }}
+            >
+              <IconSettings size={15} strokeWidth={1.9} />
+            </button>
           </div>
 
           {/* ── 메뉴 탭 (데스크탑) ── */}
@@ -283,6 +294,9 @@ export function PortfolioSidebar({
 
         </div>
       </aside>
+
+      {/* ── 설정 모달 (언어·통화·테마) ── */}
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </>
   )
 }
