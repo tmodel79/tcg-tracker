@@ -6,6 +6,7 @@
 
 export const extraLocales: Record<string, Record<string, string>> = {
   'ko': {
+    invest_chart_title: "총 투자 구성",
     tab_dashboard: "대시보드",
     tab_collection: "내 컬렉션",
     tab_add: "추가하기",
@@ -24,6 +25,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_json_btn: "JSON 불러오기",
   },
   'en': {
+    invest_chart_title: "Investment Breakdown",
     tab_dashboard: "Dashboard",
     tab_collection: "My Collection",
     tab_add: "Add Cards",
@@ -42,6 +44,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_json_btn: "Load JSON",
   },
   'ja': {
+    invest_chart_title: "総投資の内訳",
     tab_dashboard: "ダッシュボード",
     tab_collection: "コレクション",
     tab_add: "カード追加",
@@ -60,6 +63,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_json_btn: "JSON読み込み",
   },
   'zh-CN': {
+    invest_chart_title: "总投资构成",
     tab_dashboard: "仪表盘",
     tab_collection: "我的收藏",
     tab_add: "添加卡牌",
@@ -78,6 +82,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_json_btn: "加载JSON",
   },
   'zh-TW': {
+    invest_chart_title: "總投資構成",
     tab_dashboard: "儀表板",
     tab_collection: "我的收藏",
     tab_add: "新增卡牌",
@@ -96,6 +101,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_json_btn: "載入JSON",
   },
   'th': {
+    invest_chart_title: "สัดส่วนการลงทุนรวม",
     tab_dashboard: "แดชบอร์ด",
     tab_collection: "คอลเลกชันของฉัน",
     tab_add: "เพิ่มการ์ด",
@@ -114,6 +120,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_json_btn: "โหลด JSON",
   },
   'hi': {
+    invest_chart_title: "कुल निवेश संरचना",
     tab_dashboard: "डैशबोर्ड",
     tab_collection: "मेरा संग्रह",
     tab_add: "कार्ड जोड़ें",
@@ -132,6 +139,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_json_btn: "JSON लोड करें",
   },
   'es': {
+    invest_chart_title: "Composición de la inversión",
     tab_dashboard: "Panel",
     tab_collection: "Mi colección",
     tab_add: "Añadir cartas",
@@ -150,6 +158,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_json_btn: "Cargar JSON",
   },
   'it': {
+    invest_chart_title: "Composizione investimento",
     tab_dashboard: "Pannello",
     tab_collection: "La mia collezione",
     tab_add: "Aggiungi carte",
@@ -168,6 +177,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_json_btn: "Carica JSON",
   },
   'fr': {
+    invest_chart_title: "Répartition de l'investissement",
     tab_dashboard: "Tableau de bord",
     tab_collection: "Ma collection",
     tab_add: "Ajouter des cartes",
@@ -186,6 +196,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_json_btn: "Charger JSON",
   },
   'zh-HK': {
+    invest_chart_title: "總投資構成",
     tab_dashboard: "儀表板",
     tab_collection: "我的收藏",
     tab_add: "新增卡牌",
