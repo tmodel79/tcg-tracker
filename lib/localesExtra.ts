@@ -21,7 +21,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_manual_desc: "카드명·구매가·관세·배송비까지 직접 입력합니다",
     add_auto_title: "자동 가져오기 (URL · 영수증)",
     add_json_title: "JSON 백업 복원",
-    add_json_desc: "💾 백업으로 저장한 JSON 파일을 다시 불러옵니다",
+    add_json_desc: "백업 버튼으로 저장한 JSON 파일을 다시 불러옵니다",
     add_json_btn: "JSON 불러오기",
   },
   'en': {
@@ -40,7 +40,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_manual_desc: "Enter card name, purchase price, customs and shipping yourself",
     add_auto_title: "Auto Import (URL · Receipt)",
     add_json_title: "Restore JSON Backup",
-    add_json_desc: "Load a JSON file saved with 💾 Backup",
+    add_json_desc: "Load a JSON file saved with the Backup button",
     add_json_btn: "Load JSON",
   },
   'ja': {
@@ -59,7 +59,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_manual_desc: "カード名・購入価格・関税・送料を直接入力します",
     add_auto_title: "自動インポート（URL · レシート）",
     add_json_title: "JSONバックアップ復元",
-    add_json_desc: "💾 バックアップで保存したJSONファイルを読み込みます",
+    add_json_desc: "バックアップボタンで保存したJSONファイルを読み込みます",
     add_json_btn: "JSON読み込み",
   },
   'zh-CN': {
@@ -78,7 +78,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_manual_desc: "自行输入卡名、购入价、关税与运费",
     add_auto_title: "自动导入（URL · 收据）",
     add_json_title: "恢复JSON备份",
-    add_json_desc: "加载通过 💾 备份保存的JSON文件",
+    add_json_desc: "加载通过备份按钮保存的JSON文件",
     add_json_btn: "加载JSON",
   },
   'zh-TW': {
@@ -97,7 +97,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_manual_desc: "自行輸入卡名、購入價、關稅與運費",
     add_auto_title: "自動匯入（URL · 收據）",
     add_json_title: "還原JSON備份",
-    add_json_desc: "載入以 💾 備份儲存的JSON檔案",
+    add_json_desc: "載入以備份按鈕儲存的JSON檔案",
     add_json_btn: "載入JSON",
   },
   'th': {
@@ -116,7 +116,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_manual_desc: "กรอกชื่อการ์ด ราคาซื้อ ภาษี และค่าจัดส่งด้วยตนเอง",
     add_auto_title: "นำเข้าอัตโนมัติ (URL · ใบเสร็จ)",
     add_json_title: "กู้คืนไฟล์สำรอง JSON",
-    add_json_desc: "โหลดไฟล์ JSON ที่บันทึกด้วย 💾 สำรองข้อมูล",
+    add_json_desc: "โหลดไฟล์ JSON ที่บันทึกด้วยปุ่มสำรองข้อมูล",
     add_json_btn: "โหลด JSON",
   },
   'hi': {
@@ -135,7 +135,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_manual_desc: "कार्ड नाम, खरीद मूल्य, सीमा शुल्क और शिपिंग स्वयं दर्ज करें",
     add_auto_title: "ऑटो इम्पोर्ट (URL · रसीद)",
     add_json_title: "JSON बैकअप रिस्टोर",
-    add_json_desc: "💾 बैकअप से सहेजी गई JSON फ़ाइल लोड करें",
+    add_json_desc: "बैकअप बटन से सहेजी गई JSON फ़ाइल लोड करें",
     add_json_btn: "JSON लोड करें",
   },
   'es': {
@@ -154,7 +154,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_manual_desc: "Introduce nombre, precio de compra, aduanas y envío",
     add_auto_title: "Importación automática (URL · recibo)",
     add_json_title: "Restaurar copia JSON",
-    add_json_desc: "Carga un archivo JSON guardado con 💾 Copia",
+    add_json_desc: "Carga un archivo JSON guardado con el botón Copia",
     add_json_btn: "Cargar JSON",
   },
   'it': {
@@ -173,7 +173,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_manual_desc: "Inserisci nome, prezzo di acquisto, dogana e spedizione",
     add_auto_title: "Importazione automatica (URL · ricevuta)",
     add_json_title: "Ripristina backup JSON",
-    add_json_desc: "Carica un file JSON salvato con 💾 Backup",
+    add_json_desc: "Carica un file JSON salvato con il pulsante Backup",
     add_json_btn: "Carica JSON",
   },
   'fr': {
@@ -192,7 +192,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_manual_desc: "Saisissez le nom, le prix d'achat, la douane et la livraison",
     add_auto_title: "Import automatique (URL · reçu)",
     add_json_title: "Restaurer une sauvegarde JSON",
-    add_json_desc: "Chargez un fichier JSON enregistré avec 💾 Sauvegarde",
+    add_json_desc: "Chargez un fichier JSON enregistré avec le bouton Sauvegarde",
     add_json_btn: "Charger JSON",
   },
   'zh-HK': {
@@ -211,7 +211,7 @@ export const extraLocales: Record<string, Record<string, string>> = {
     add_manual_desc: "自行輸入卡名、購入價、關稅與運費",
     add_auto_title: "自動匯入（URL · 收據）",
     add_json_title: "還原JSON備份",
-    add_json_desc: "載入以 💾 備份儲存的JSON檔案",
+    add_json_desc: "載入以備份按鈕儲存的JSON檔案",
     add_json_btn: "載入JSON",
   },
 }
