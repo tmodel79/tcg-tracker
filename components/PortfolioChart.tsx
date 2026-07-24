@@ -236,9 +236,10 @@ export function PortfolioChart({ cards, onSaveSnapshot }: PortfolioChartProps) {
               <XAxis dataKey="date" tick={{ fontSize: 9.5, fill: 'var(--muted-2)' }} axisLine={false} tickLine={false} />
               <YAxis hide domain={['auto', 'auto']} />
               <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="cost"  stroke="#8b98a5" strokeWidth={1.5} fill="url(#gradCost)"  dot={false} strokeDasharray="4 2" />
+              <Area type="monotone" dataKey="cost"  stroke="#8b98a5" strokeWidth={1.5} fill="url(#gradCost)"  dot={false} strokeDasharray="4 2" isAnimationActive={false} />
               <Area type="monotone" dataKey="value" stroke="var(--accent)" strokeWidth={2} fill="url(#gradValue)" dot={false}
                 activeDot={{ r: 4, fill: 'var(--accent)', strokeWidth: 0 }}
+                isAnimationActive={false}
               />
             </AreaChart>
           </ResponsiveContainer>

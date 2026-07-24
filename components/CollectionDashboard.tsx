@@ -438,6 +438,7 @@ function InvestDonut({
                 outerRadius="92%"
                 paddingAngle={data.length > 1 ? 2 : 0}
                 stroke="none"
+                isAnimationActive={false}
               >
                 {data.map(d => (
                   <Cell key={d.name} fill={GAME_COLORS[d.name] || '#8b98a5'} />
