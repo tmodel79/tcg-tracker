@@ -15,6 +15,7 @@ import { PriceSearch } from '@/components/PriceSearch'
 import { AddHub } from '@/components/AddHub'
 import { Toast } from '@/components/Toast'
 import type { Card, SortMode } from '@/types/card'
+import { IconCards } from '@/components/Icons'
 import type { TabId } from '@/components/PortfolioSidebar'
 import type { CardPrefill } from '@/components/CardModal'
 
@@ -129,11 +130,43 @@ export default function HomePage() {
     toast(t('toast_backup_done'))
   }
 
-  // ── 로딩 ──
+  // ── 로딩 — 실제 화면 모양의 스켈레톤 ──
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: 'var(--muted)', fontSize: 14 }}>
-        {t('loading')}
+      <div style={{ display: 'flex', minHeight: '100vh' }}>
+        <style>{`
+          @media (max-width: 860px) { .sk-side { display: none; } }
+        `}</style>
+        {/* 사이드바 스켈레톤 */}
+        <div className="sk-side" style={{
+          width: 256, flexShrink: 0, minHeight: '100vh',
+          borderRight: '1px solid var(--border)', background: 'var(--panel)',
+          padding: '18px 14px', display: 'flex', flexDirection: 'column', gap: 12,
+        }}>
+          <div className="sk" style={{ width: 120, height: 18 }} />
+          <div className="sk" style={{ width: 150, height: 26 }} />
+          <div style={{ height: 8 }} />
+          {[0, 1, 2, 3].map(i => (
+            <div key={i} className="sk" style={{ width: '100%', height: 34, animationDelay: `${i * 0.12}s` }} />
+          ))}
+        </div>
+        {/* 메인 스켈레톤 */}
+        <div style={{ flex: 1, padding: '28px 28px 64px', minWidth: 0 }}>
+          <div className="sk" style={{ width: 180, height: 26, marginBottom: 18 }} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {[0, 1, 2, 3].map(i => (
+                <div key={i} className="sk" style={{ height: 74, animationDelay: `${i * 0.1}s` }} />
+              ))}
+            </div>
+            <div className="sk" style={{ height: 158, animationDelay: '0.2s' }} />
+          </div>
+          <div className="sk" style={{ height: 200, marginBottom: 14, animationDelay: '0.3s' }} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div className="sk" style={{ height: 70, animationDelay: '0.4s' }} />
+            <div className="sk" style={{ height: 70, animationDelay: '0.5s' }} />
+          </div>
+        </div>
       </div>
     )
   }
@@ -205,8 +238,9 @@ export default function HomePage() {
               <>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
                   <div>
-                    <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, letterSpacing: '-0.02em' }}>
-                      🃏 {t('tab_collection')}
+                    <h2 style={{ margin: 0, fontSize: 20, fontWeight: 900, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconCards size={19} strokeWidth={2.2} /></span>
+                      {t('tab_collection')}
                     </h2>
                     <div style={{ fontSize: 11.5, color: 'var(--muted-2)', marginTop: 2 }}>
                       {t('dash_sub', { total: summary.totalCards, priced: summary.pricedCards })}
