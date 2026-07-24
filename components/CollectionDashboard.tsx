@@ -9,7 +9,18 @@ import { calcCard } from '@/lib/calc'
 import { useI18n } from '@/lib/i18n'
 import { pctCompact } from '@/lib/utils'
 import type { Card, PortfolioSummary } from '@/types/card'
+import { GAMES } from '@/types/card'
 import { PortfolioChart } from './PortfolioChart'
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts'
+
+const GAME_COLORS: Record<string, string> = {
+  '원피스': '#e84040',
+  '포켓몬': '#f5c518',
+  '드래곤볼': '#ff7b00',
+  '건담': '#4d9dff',
+  '유희왕': '#9b59b6',
+  '기타': '#8b98a5',
+}
 
 interface CollectionDashboardProps {
   cards: Card[]
@@ -180,17 +191,23 @@ export function CollectionDashboard({
   return (
     <div style={{ marginBottom: 20 }}>
       <style>{`
-        .cdb-stats {
+        .cdb-top {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: 1fr 1fr;
           gap: 10px;
           margin-bottom: 14px;
+          align-items: stretch;
         }
         @media (max-width: 900px) {
-          .cdb-stats { grid-template-columns: repeat(2, 1fr); }
+          .cdb-top { grid-template-columns: 1fr; }
+        }
+        .cdb-stats {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
         }
         @media (max-width: 500px) {
-          .cdb-stats { grid-template-columns: repeat(2, 1fr); gap: 7px; }
+          .cdb-stats { gap: 7px; }
         }
         .cdb-bottom {
           display: grid;
@@ -265,7 +282,8 @@ export function CollectionDashboard({
         </div>
       </div>
 
-      {/* 통계 카드 4개 */}
+      {/* 상단 2분할 — 좌: 통계 2×2 / 우: 총 투자 구성 도넛 차트 */}
+      <div className="cdb-top">
       <div className="cdb-stats">
         <MiniStatCard
           label="총 투자"
@@ -296,6 +314,10 @@ export function CollectionDashboard({
           }
           sub={pricedCards > 0 ? '전체 평균' : undefined}
         />
+      </div>
+
+      {/* 총 투자 구성 차트 */}
+      <InvestDonut cards={cards} invest={invest} fmtC={fmtC} title={t('invest_chart_title')} />
       </div>
 
       {/* 포트폴리오 가치 차트 (사이드바에서 이동) */}
@@ -363,6 +385,102 @@ export function CollectionDashboard({
           <span>카드 편집에서 <strong style={{ color: 'var(--text)' }}>현재가</strong>를 입력하거나 <strong style={{ color: 'var(--text)' }}>🔍 시세 검색</strong>으로 현재 시세를 가져오면 손익이 계산됩니다.</span>
         </div>
       )}
+    </div>
+  )
+}
+
+// ── 총 투자 구성 도넛 차트 (게임별 투자 금액 비중) ──
+function InvestDonut({
+  cards, invest, fmtC, title,
+}: {
+  cards: Card[]
+  invest: number
+  fmtC: (v: number) => string
+  title: string
+}) {
+  const data = GAMES
+    .map(g => ({
+      name: g,
+      value: cards.filter(c => c.game === g).reduce((s, c) => s + calcCard(c).totalCost, 0),
+    }))
+    .filter(d => d.value > 0)
+    .sort((a, b) => b.value - a.value)
+
+  return (
+    <div style={{
+      background: 'var(--panel-2)',
+      border: '1px solid var(--border)',
+      borderRadius: 12,
+      padding: '12px 14px',
+      display: 'flex',
+      flexDirection: 'column',
+      minWidth: 0,
+    }}>
+      <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--muted-2)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>
+        {title}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minHeight: 150 }}>
+        {/* 도넛 */}
+        <div style={{ width: '52%', height: 156, position: 'relative', minWidth: 0, flexShrink: 0 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="name"
+                innerRadius="62%"
+                outerRadius="92%"
+                paddingAngle={data.length > 1 ? 2 : 0}
+                stroke="none"
+              >
+                {data.map(d => (
+                  <Cell key={d.name} fill={GAME_COLORS[d.name] || '#8b98a5'} />
+                ))}
+              </Pie>
+              <Tooltip
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                formatter={((v: any) => fmtC(Number(v))) as any}
+                contentStyle={{
+                  background: 'var(--panel)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 10,
+                  fontSize: 12,
+                }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+          {/* 중앙 총 투자액 */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            pointerEvents: 'none',
+          }}>
+            <span className="num" style={{ fontSize: 15, fontWeight: 800 }}>{fmtC(invest)}</span>
+          </div>
+        </div>
+        {/* 범례 */}
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {data.map(d => (
+            <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 7, minWidth: 0 }}>
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                background: GAME_COLORS[d.name] || '#8b98a5',
+              }} />
+              <span style={{ fontSize: 11.5, color: 'var(--muted)', flexShrink: 0 }}>{d.name}</span>
+              <span className="num" style={{
+                fontSize: 11.5, fontWeight: 700, marginLeft: 'auto',
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {fmtC(d.value)}
+              </span>
+              <span className="num" style={{ fontSize: 10.5, color: 'var(--muted-2)', flexShrink: 0, width: 34, textAlign: 'right' }}>
+                {invest > 0 ? Math.round((d.value / invest) * 100) : 0}%
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
