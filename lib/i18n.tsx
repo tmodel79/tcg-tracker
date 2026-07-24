@@ -8,6 +8,7 @@ import {
   ReactNode,
 } from 'react'
 import { locales, Locale, LOCALE_NAMES, defaultLocale } from './locales'
+import { extraLocales } from './localesExtra'
 import {
   CurrencyCode,
   CurrencyInfo,
@@ -94,7 +95,13 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const t = (key: string, vars?: Record<string, string | number>): string => {
     const dict = locales[locale]
-    const template = dict[key] ?? locales[defaultLocale][key] ?? key
+    const extra = extraLocales[locale]
+    const template =
+      dict[key] ??
+      extra?.[key] ??
+      locales[defaultLocale][key] ??
+      extraLocales[defaultLocale]?.[key] ??
+      key
     return interpolate(template, vars)
   }
 
