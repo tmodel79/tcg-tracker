@@ -32,7 +32,7 @@ function extractJsonLd(html: string): Record<string, unknown> | null {
 // eBay 상품 파싱
 async function fetchEbay(url: string) {
   const res = await fetch(url, { headers: HEADERS, signal: AbortSignal.timeout(10000) })
-  if (!res.ok) throw new Error(`eBay 접속 실패 (${res.status})`)
+  if (!res.ok) throw new Error(`Failed to reach eBay (${res.status})`)
   const html = await res.text()
 
   const ld = extractJsonLd(html)
@@ -77,7 +77,7 @@ async function fetchYahoo(url: string) {
     headers: { ...HEADERS, 'Accept-Language': 'ja-JP,ja;q=0.9' },
     signal: AbortSignal.timeout(10000),
   })
-  if (!res.ok) throw new Error(`야후옥션 접속 실패 (${res.status})`)
+  if (!res.ok) throw new Error(`Failed to reach Yahoo Auctions JP (${res.status})`)
   const html = await res.text()
 
   const ld = extractJsonLd(html)
@@ -105,7 +105,7 @@ async function fetchYahoo(url: string) {
     currency: 'JPY' as const,
     fee: null,
     shipping: null,
-    platform: '야후옥션',
+    platform: 'Yahoo Auctions JP',
     image_url: imageUrl,
     source_url: url,
   }
@@ -122,7 +122,7 @@ async function fetchMercari(url: string) {
     },
     signal: AbortSignal.timeout(10000),
   })
-  if (!res.ok) throw new Error(`메르카리 접속 실패 (${res.status})`)
+  if (!res.ok) throw new Error(`Failed to reach Mercari (${res.status})`)
   const html = await res.text()
 
   const ld = extractJsonLd(html)
@@ -150,7 +150,7 @@ async function fetchMercari(url: string) {
     currency: (isJp ? 'JPY' : 'USD') as 'JPY' | 'USD',
     fee: null,
     shipping: null,
-    platform: '메르카리',
+    platform: 'Mercari',
     image_url: imageUrl,
     source_url: url,
   }
@@ -160,7 +160,7 @@ export async function POST(req: NextRequest) {
   try {
     const { url } = await req.json()
     if (!url || typeof url !== 'string') {
-      return NextResponse.json({ error: 'URL이 필요합니다' }, { status: 400 })
+      return NextResponse.json({ error: 'URL is required' }, { status: 400 })
     }
 
     const platform = detectPlatform(url.trim())
@@ -172,14 +172,14 @@ export async function POST(req: NextRequest) {
       case 'mercari': result = await fetchMercari(url.trim()); break
       default:
         return NextResponse.json(
-          { error: '지원하지 않는 사이트입니다.\n현재 지원: eBay, 야후옥션, 메르카리' },
+          { error: 'Unsupported site.\nSupported: eBay, Yahoo Auctions JP, Mercari' },
           { status: 400 }
         )
     }
 
     return NextResponse.json(result)
   } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : '알 수 없는 오류'
+    const msg = e instanceof Error ? e.message : 'Unknown error'
     return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
