@@ -86,10 +86,10 @@ export const stamp = (): string =>
  */
 export function buildCsvBlob(cards: Card[]): Blob {
   const head = [
-    '카드명','게임','등급','구매일',
-    '구매가','통화','환율','구매가(원)',
-    '관세','배송대행비','기타비용','총원가(원)',
-    '현재가(원)','손익(원)','수익률(%)',
+    'Name','Game','Grade','Buy Date',
+    'Buy Price','Currency','FX Rate','Buy Price (KRW)',
+    'Customs','Forwarding','Other Costs','Total Cost (KRW)',
+    'Current Price (KRW)','P&L (KRW)','Return (%)',
   ]
   const lines = cards.map((c) => {
     const k = calcCard(c)

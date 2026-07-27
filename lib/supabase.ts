@@ -14,7 +14,7 @@ function getClient(): SupabaseClient {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !key || url.startsWith('여기에') || url === '') {
-    throw new Error('Supabase 환경변수가 설정되지 않았습니다. .env.local을 확인하세요.')
+    throw new Error('Supabase environment variables are not configured. Check .env.local.')
   }
   _client = createClient(url, key)
   return _client
@@ -80,7 +80,7 @@ export async function importCards(cards: Card[]): Promise<void> {
     data: { user },
   } = await client.auth.getUser()
 
-  if (!user) throw new Error('로그인이 필요합니다')
+  if (!user) throw new Error('Login required')
 
   const rows = cards.map((c) => ({ ...c, user_id: user.id }))
   const { error } = await client.from('cards').upsert(rows)
