@@ -14,6 +14,7 @@ import { ImportModal } from '@/components/ImportModal'
 import { PriceSearch } from '@/components/PriceSearch'
 import { AddHub } from '@/components/AddHub'
 import { Toast } from '@/components/Toast'
+import { ALL_GAMES } from '@/types/card'
 import type { Card, SortMode } from '@/types/card'
 import { IconCards } from '@/components/Icons'
 import type { TabId } from '@/components/PortfolioSidebar'
@@ -27,7 +28,7 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<TabId>('dashboard')
 
   // ── 컬렉션 탭 UI 상태 ──
-  const [filterGame, setFilterGame]   = useState('전체')
+  const [filterGame, setFilterGame]   = useState(ALL_GAMES)
   const [searchText, setSearchText]   = useState('')
   const [sortMode, setSortMode]       = useState<SortMode>('pct')
 

@@ -3,8 +3,8 @@ import './globals.css'
 import { ClientWrapper } from '@/components/ClientWrapper'
 
 export const metadata: Metadata = {
-  title: 'CardLedger — 카드 포트폴리오',
-  description: '카드 컬렉션을 주식 포트폴리오처럼 관리. 총원가·손익·수익률 한 화면에서.',
+  title: 'CardLedger — Card Portfolio Tracker',
+  description: 'Manage your card collection like a stock portfolio. Total cost, P&L and returns on one screen.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
