@@ -74,7 +74,20 @@ export interface CardFormData {
 }
 
 export const GAMES: Game[] = ['원피스', '포켓몬', '드래곤볼', '건담', '유희왕', '기타']
-export const GAMES_WITH_ALL = ['전체', ...GAMES] as const
+
+// 게임 필터 "전체" 내부 센티널 값 (표시에는 t('filter_all') 사용)
+export const ALL_GAMES = 'ALL'
+export const GAMES_WITH_ALL = [ALL_GAMES, ...GAMES] as const
+
+// 표시용 번역 키 매핑 — DB 저장값(한국어)은 내부 ID로 유지하고, 화면에는 t(GAME_LABEL_KEYS[game] ?? 'game_other')로 렌더링
+export const GAME_LABEL_KEYS: Record<string, string> = {
+  '원피스': 'game_onepiece',
+  '포켓몬': 'game_pokemon',
+  '드래곤볼': 'game_dragonball',
+  '건담': 'game_gundam',
+  '유희왕': 'game_yugioh',
+  '기타': 'game_other',
+}
 
 export const FX_DEFAULT: Record<Currency, number> = {
   KRW: 1,
