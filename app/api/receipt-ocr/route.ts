@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
     return NextResponse.json(
-      { error: 'ANTHROPIC_API_KEY가 서버에 설정되지 않았습니다.' },
+      { error: 'ANTHROPIC_API_KEY is not configured on the server.' },
       { status: 500 }
     )
   }
@@ -36,11 +36,11 @@ export async function POST(req: NextRequest) {
     imageBase64 = body.imageBase64
     mediaType = body.mediaType ?? 'image/jpeg'
   } catch {
-    return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 400 })
+    return NextResponse.json({ error: 'Invalid request.' }, { status: 400 })
   }
 
   if (!imageBase64) {
-    return NextResponse.json({ error: '이미지 데이터가 없습니다.' }, { status: 400 })
+    return NextResponse.json({ error: 'Missing image data.' }, { status: 400 })
   }
 
   const client = new Anthropic({ apiKey })
@@ -89,6 +89,6 @@ export async function POST(req: NextRequest) {
     const result: ReceiptOcrResult = jsonMatch ? JSON.parse(jsonMatch[0]) : {}
     return NextResponse.json(result)
   } catch {
-    return NextResponse.json({ error: '응답 파싱 실패', raw: text })
+    return NextResponse.json({ error: 'Failed to parse the AI response', raw: text })
   }
 }
