@@ -276,14 +276,14 @@ export async function GET(req: NextRequest) {
   const game = sp.get('game') || '원피스'
   const lang = sp.get('lang') || 'JP'
 
-  if (!name) return NextResponse.json({ error: '카드명 필요' }, { status: 400 })
+  if (!name) return NextResponse.json({ error: 'Card name is required' }, { status: 400 })
 
   const results: PriceResult[] = []
 
   // ── 한판 (KR) ──────────────────────────────────
   if (lang === 'KR') {
-    results.push({ source: 'kream',   label: '크림 (KREAM)', price: null, currency: 'KRW', rawPrice: null, url: kreamUrl(name, cardNumber) })
-    results.push({ source: 'bunjang', label: '번개장터',      price: null, currency: 'KRW', rawPrice: null, url: bunjangUrl(name, cardNumber) })
+    results.push({ source: 'kream',   label: 'KREAM', price: null, currency: 'KRW', rawPrice: null, url: kreamUrl(name, cardNumber) })
+    results.push({ source: 'bunjang', label: 'Bunjang',       price: null, currency: 'KRW', rawPrice: null, url: bunjangUrl(name, cardNumber) })
     return NextResponse.json({ results, lang, name, cardNumber, game })
   }
 
@@ -321,7 +321,7 @@ export async function GET(req: NextRequest) {
     // 130point (eBay 낙찰 집계)
     results.push({
       source: '130point',
-      label: '130point (eBay 낙찰)',
+      label: '130point (eBay sales)',
       price: ptData.price ? Math.round(ptData.price * FX.USD) : null,
       currency: 'USD',
       rawPrice: ptData.price,
@@ -336,7 +336,7 @@ export async function GET(req: NextRequest) {
       : null
     results.push({
       source: 'ebay',
-      label: 'eBay (판매완료)',
+      label: 'eBay (sold listings)',
       price: avgEbay ? Math.round(avgEbay * FX.USD) : null,
       currency: 'USD',
       rawPrice: avgEbay ? Math.round(avgEbay * 100) / 100 : null,
@@ -370,7 +370,7 @@ export async function GET(req: NextRequest) {
     // 130point
     results.push({
       source: '130point',
-      label: '130point (eBay 낙찰)',
+      label: '130point (eBay sales)',
       price: ptData.price ? Math.round(ptData.price * FX.USD) : null,
       currency: 'USD',
       rawPrice: ptData.price,
@@ -385,7 +385,7 @@ export async function GET(req: NextRequest) {
       : null
     results.push({
       source: 'ebay',
-      label: 'eBay (판매완료)',
+      label: 'eBay (sold listings)',
       price: avgEbay ? Math.round(avgEbay * FX.USD) : null,
       currency: 'USD',
       rawPrice: avgEbay ? Math.round(avgEbay * 100) / 100 : null,
@@ -419,7 +419,7 @@ export async function GET(req: NextRequest) {
     // 130point
     results.push({
       source: '130point',
-      label: '130point (eBay 낙찰)',
+      label: '130point (eBay sales)',
       price: ptData.price ? Math.round(ptData.price * FX.USD) : null,
       currency: 'USD',
       rawPrice: ptData.price,
@@ -434,7 +434,7 @@ export async function GET(req: NextRequest) {
       : null
     results.push({
       source: 'ebay',
-      label: 'eBay (판매완료)',
+      label: 'eBay (sold listings)',
       price: avgEbay ? Math.round(avgEbay * FX.USD) : null,
       currency: 'USD',
       rawPrice: avgEbay ? Math.round(avgEbay * 100) / 100 : null,
