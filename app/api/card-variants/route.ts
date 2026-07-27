@@ -73,7 +73,7 @@ async function fetchYugioh(cardNumber: string): Promise<CardVariant[]> {
         id: String(img.id),
         name: c.name,
         image_url: img.image_url ?? '',
-        variant_name: i === 0 ? '기본 아트' : `아트 #${i + 1}`,
+        variant_name: i === 0 ? 'Default art' : `Art #${i + 1}`,
         set_name: undefined,
       }))
     ).filter((v: CardVariant) => v.image_url)
