@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useI18n } from '@/lib/i18n'
 
 export interface CardVariant {
   id: string
@@ -18,6 +19,7 @@ interface CardVariantPickerProps {
 }
 
 export function CardVariantPicker({ game, cardNumber, selectedUrl, onSelect }: CardVariantPickerProps) {
+  const { t } = useI18n()
   const [variants, setVariants] = useState<CardVariant[]>([])
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState('')
@@ -45,10 +47,10 @@ export function CardVariantPicker({ game, cardNumber, selectedUrl, onSelect }: C
         setVariants(data.variants ?? [])
         setSearched(num)
         if ((data.variants ?? []).length === 0) {
-          setError('검색 결과가 없습니다. 이미지를 직접 업로드하거나 URL을 입력해 주세요.')
+          setError(t('variant_none'))
         }
       } catch {
-        setError('카드 검색 중 오류가 발생했습니다.')
+        setError(t('variant_error'))
       } finally {
         setLoading(false)
       }
@@ -60,7 +62,7 @@ export function CardVariantPicker({ game, cardNumber, selectedUrl, onSelect }: C
   if (!SUPPORTED.includes(game)) {
     return (
       <p style={{ color: 'var(--muted-2)', fontSize: 12, marginTop: 6 }}>
-        이 게임은 자동 이미지 검색이 지원되지 않습니다. 직접 파일을 업로드하거나 카메라로 촬영해 주세요.
+        {t('variant_unsupported')}
       </p>
     )
   }
@@ -70,7 +72,7 @@ export function CardVariantPicker({ game, cardNumber, selectedUrl, onSelect }: C
   return (
     <div style={{ marginTop: 10 }}>
       {loading && (
-        <p style={{ color: 'var(--muted)', fontSize: 12 }}>🔍 카드 이미지 검색 중…</p>
+        <p style={{ color: 'var(--muted)', fontSize: 12 }}>🔍 {t('variant_searching')}</p>
       )}
 
       {!loading && error && (
@@ -80,7 +82,7 @@ export function CardVariantPicker({ game, cardNumber, selectedUrl, onSelect }: C
       {!loading && variants.length > 0 && (
         <>
           <p style={{ color: 'var(--muted)', fontSize: 12, marginBottom: 8 }}>
-            {variants.length}가지 일러스트 버전을 찾았습니다. 원하는 것을 선택하세요.
+            {t('variant_found', { n: variants.length })}
           </p>
           <div
             style={{

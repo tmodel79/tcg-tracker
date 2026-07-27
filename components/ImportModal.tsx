@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { GAME_LABEL_KEYS } from '@/types/card'
 import type { Card } from '@/types/card'
 import { useI18n } from '@/lib/i18n'
 import { IconFolder } from './Icons'
@@ -22,7 +23,7 @@ export function ImportModal({ open, onClose, onImport }: ImportModalProps) {
     r.onload = () => {
       try {
         const arr = JSON.parse(r.result as string)
-        if (!Array.isArray(arr)) throw new Error('배열이 아닙니다')
+        if (!Array.isArray(arr)) throw new Error('Not an array')
         setPreview(arr as Card[])
         setErr('')
       } catch {
@@ -155,7 +156,7 @@ export function ImportModal({ open, onClose, onImport }: ImportModalProps) {
             <div style={{ color: 'var(--muted)', fontSize: 12, lineHeight: 1.8 }}>
               {preview.slice(0, 5).map((c, i) => (
                 <div key={i}>
-                  · {c.name} ({c.game})
+                  · {c.name} ({c.game ? t(GAME_LABEL_KEYS[c.game] ?? 'game_other') : t('game_other')})
                 </div>
               ))}
               {preview.length > 5 && (

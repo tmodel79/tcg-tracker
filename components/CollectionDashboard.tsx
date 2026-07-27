@@ -9,7 +9,7 @@ import { calcCard } from '@/lib/calc'
 import { useI18n } from '@/lib/i18n'
 import { pctCompact } from '@/lib/utils'
 import type { Card, PortfolioSummary } from '@/types/card'
-import { GAMES } from '@/types/card'
+import { GAMES, GAME_LABEL_KEYS } from '@/types/card'
 import { PortfolioChart } from './PortfolioChart'
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts'
 import { IconDashboard, IconCards, IconSearch, IconTrendUp, IconTrendDown, IconGlobe } from './Icons'
@@ -143,7 +143,7 @@ export function CollectionDashboard({
             color: 'var(--muted)', fontSize: 14, margin: '0 auto', maxWidth: 440,
             lineHeight: 1.6,
           }}>
-            실시간 시세 조회, 포트폴리오 손익 추적, 시세 히스토리 차트까지 — 프로 트레이더처럼 관리하세요.
+            {t('hero_sub')}
           </p>
 
           <div className="cdb-cta-row">
@@ -157,7 +157,7 @@ export function CollectionDashboard({
                 boxShadow: '0 4px 20px rgba(232,177,58,0.35)',
               }}
             >
-              + 첫 카드 추가하기
+              {t('table_empty_btn')}
             </button>
             <button
               onClick={onSearchTab}
@@ -169,15 +169,15 @@ export function CollectionDashboard({
                 display: 'inline-flex', alignItems: 'center', gap: 7,
               }}
             >
-              <IconSearch size={14} /> 시세 검색해보기
+              <IconSearch size={14} /> {t('try_price_search')}
             </button>
           </div>
 
           <div className="cdb-feature-grid">
             {[
-              { Icon: IconSearch,  title: '실시간 시세 조회', desc: 'eBay · TCGPlayer · Cardmarket · 130point · Yahoo JP · Mercari 동시 검색' },
-              { Icon: IconTrendUp, title: '포트폴리오 차트', desc: '내 컬렉션의 가치 변화를 날짜별로 기록하고 시각화합니다' },
-              { Icon: IconGlobe,   title: '글로벌 멀티 통화', desc: '한국·미국·일본·유럽 — 원하는 통화로 자동 환산' },
+              { Icon: IconSearch,  title: t('feat_price_title'),    desc: t('feat_price_desc') },
+              { Icon: IconTrendUp, title: t('feat_chart_title'),    desc: t('feat_chart_desc') },
+              { Icon: IconGlobe,   title: t('feat_currency_title'), desc: t('feat_currency_desc') },
             ].map(f => (
               <div key={f.title} className="cdb-feature">
                 <div style={{ marginBottom: 10, color: 'var(--accent)' }}><f.Icon size={20} strokeWidth={1.8} /></div>
@@ -292,33 +292,33 @@ export function CollectionDashboard({
       <div className="cdb-top">
       <div className="cdb-stats">
         <MiniStatCard
-          label="총 투자"
+          label={t('stat_invest')}
           value={fmtC(invest)}
-          sub={`${totalCards}장`}
+          sub={t('n_cards_short', { n: totalCards })}
         />
         <MiniStatCard
-          label="현재 가치"
+          label={t('stat_value')}
           value={fmtC(value)}
-          sub={pricedCards > 0 ? `${pricedCards}장 평가됨` : '시세 미입력'}
+          sub={pricedCards > 0 ? t('n_priced_short', { n: pricedCards }) : t('no_price_yet')}
           accent
         />
         <MiniStatCard
-          label="총 손익"
+          label={t('summary_pnl')}
           value={
             <span style={{ color: pnlColor }}>
               {pnl >= 0 ? '+' : '−'}{fmtC(Math.abs(pnl))}
             </span>
           }
-          sub={pricedCards > 0 ? '평가 기준' : undefined}
+          sub={pricedCards > 0 ? t('based_on_priced') : undefined}
         />
         <MiniStatCard
-          label="수익률"
+          label={t('col_pct')}
           value={
             <span style={{ color: pnlColor, fontSize: 22 }}>
               {pctCompact(pct, locale)}
             </span>
           }
-          sub={pricedCards > 0 ? '전체 평균' : undefined}
+          sub={pricedCards > 0 ? t('overall_avg') : undefined}
         />
       </div>
 
@@ -333,7 +333,7 @@ export function CollectionDashboard({
       {pricedList.length >= 2 && topCard && worstCard && (
         <div className="cdb-bottom">
           <PerformerCard
-            label="Best Performer"
+            label={t('best_performer')}
             card={topCard.card}
             calc={topCard.calc}
             isGain
@@ -341,7 +341,7 @@ export function CollectionDashboard({
             locale={locale}
           />
           <PerformerCard
-            label="Needs Attention"
+            label={t('needs_attention')}
             card={worstCard.card}
             calc={worstCard.calc}
             isGain={false}
@@ -353,7 +353,7 @@ export function CollectionDashboard({
       {pricedList.length === 1 && topCard && (
         <div className="cdb-bottom">
           <PerformerCard
-            label="평가된 카드"
+            label={t('priced_card_label')}
             card={topCard.card}
             calc={topCard.calc}
             isGain={topCard.calc.pnl >= 0}
@@ -371,7 +371,7 @@ export function CollectionDashboard({
             color: 'var(--muted-2)',
             fontSize: 12,
           }}>
-            시세가 입력된 카드가 늘어나면<br />성과 비교가 표시됩니다
+            {t('performer_hint_1')}<br />{t('performer_hint_2')}
           </div>
         </div>
       )}
@@ -388,7 +388,7 @@ export function CollectionDashboard({
           fontSize: 12.5,
         }}>
           <span style={{ fontSize: 20 }}>💡</span>
-          <span>카드 편집에서 <strong style={{ color: 'var(--text)' }}>현재가</strong>를 입력하거나 <strong style={{ color: 'var(--text)' }}>시세 검색</strong>으로 현재 시세를 가져오면 손익이 계산됩니다.</span>
+          <span>{t('pnl_hint_1')}<strong style={{ color: 'var(--text)' }}>{t('pnl_hint_price')}</strong>{t('pnl_hint_2')}<strong style={{ color: 'var(--text)' }}>{t('pnl_hint_search')}</strong>{t('pnl_hint_3')}</span>
         </div>
       )}
     </div>
@@ -404,9 +404,11 @@ function InvestDonut({
   fmtC: (v: number) => string
   title: string
 }) {
+  const { t } = useI18n()
   const data = GAMES
     .map(g => ({
       name: g,
+      label: t(GAME_LABEL_KEYS[g] ?? 'game_other'),
       value: cards.filter(c => c.game === g).reduce((s, c) => s + calcCard(c).totalCost, 0),
     }))
     .filter(d => d.value > 0)
@@ -433,7 +435,7 @@ function InvestDonut({
               <Pie
                 data={data}
                 dataKey="value"
-                nameKey="name"
+                nameKey="label"
                 innerRadius="62%"
                 outerRadius="92%"
                 paddingAngle={data.length > 1 ? 2 : 0}
@@ -474,7 +476,7 @@ function InvestDonut({
                 width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
                 background: GAME_COLORS[d.name] || '#8b98a5',
               }} />
-              <span style={{ fontSize: 11.5, color: 'var(--muted)', flexShrink: 0 }}>{d.name}</span>
+              <span style={{ fontSize: 11.5, color: 'var(--muted)', flexShrink: 0 }}>{d.label}</span>
               <span className="num" style={{
                 fontSize: 11.5, fontWeight: 700, marginLeft: 'auto',
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',

@@ -5,6 +5,7 @@
 // ========================================
 
 import { useEffect, useState } from 'react'
+import { useI18n } from '@/lib/i18n'
 import {
   ResponsiveContainer, LineChart, Line,
   XAxis, YAxis, Tooltip, ReferenceLine,
@@ -51,6 +52,7 @@ function MiniTooltip({ active, payload, label }: any) {
 }
 
 export function CardPriceChart({ cardId, totalCostKrw }: CardPriceChartProps) {
+  const { t } = useI18n()
   const [history, setHistory] = useState<PricePoint[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -65,7 +67,7 @@ export function CardPriceChart({ cardId, totalCostKrw }: CardPriceChartProps) {
 
   if (loading) return (
     <div style={{ height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <span style={{ fontSize: 11, color: 'var(--muted-2)' }}>불러오는 중…</span>
+      <span style={{ fontSize: 11, color: 'var(--muted-2)' }}>{t('loading')}</span>
     </div>
   )
 
@@ -79,8 +81,8 @@ export function CardPriceChart({ cardId, totalCostKrw }: CardPriceChartProps) {
       textAlign: 'center',
       lineHeight: 1.6,
     }}>
-      시세 기록이 없습니다.<br />
-      <span style={{ fontSize: 11 }}>현재가 저장 후 메인화면의 기록 버튼을 누르면 차트가 생성됩니다.</span>
+      {t('no_price_history')}<br />
+      <span style={{ fontSize: 11 }}>{t('no_price_history_hint')}</span>
     </div>
   )
 
@@ -101,7 +103,7 @@ export function CardPriceChart({ cardId, totalCostKrw }: CardPriceChartProps) {
       {/* 미니 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--muted-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-          시세 히스토리
+          {t('price_history_title')}
         </span>
         <span className="num" style={{ fontSize: 12, fontWeight: 800, color: isGain ? 'var(--gain)' : 'var(--loss)' }}>
           {isGain ? '+' : '−'}{fmtKrw(Math.abs(change))} ({isGain ? '+' : ''}{changePct}%)
@@ -122,7 +124,7 @@ export function CardPriceChart({ cardId, totalCostKrw }: CardPriceChartProps) {
                 stroke="var(--muted-2)"
                 strokeDasharray="4 3"
                 strokeWidth={1}
-                label={{ value: '원가', position: 'right', fontSize: 9, fill: 'var(--muted-2)' }}
+                label={{ value: t('cost_label'), position: 'right', fontSize: 9, fill: 'var(--muted-2)' }}
               />
             )}
             <Line
@@ -138,7 +140,7 @@ export function CardPriceChart({ cardId, totalCostKrw }: CardPriceChartProps) {
       </div>
 
       <div style={{ fontSize: 10, color: 'var(--muted-2)', textAlign: 'right', marginTop: 4 }}>
-        {history.length}개 기록 · 최근 {fmtDate(history[history.length - 1].recorded_at)}
+        {t('n_records_latest', { n: history.length, date: fmtDate(history[history.length - 1].recorded_at) })}
       </div>
     </div>
   )

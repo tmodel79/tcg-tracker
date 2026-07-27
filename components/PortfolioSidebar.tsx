@@ -5,7 +5,7 @@ import { calcCard } from '@/lib/calc'
 import { useI18n } from '@/lib/i18n'
 import { SettingsModal } from './SettingsModal'
 import type { Card } from '@/types/card'
-import { GAMES } from '@/types/card'
+import { GAMES, GAME_LABEL_KEYS } from '@/types/card'
 import { IconDashboard, IconCards, IconPlus, IconSearch, IconSave, IconTable, IconSettings } from './Icons'
 
 const GAME_COLORS: Record<string, string> = {
@@ -250,7 +250,7 @@ export function PortfolioSidebar({
               <p className="ps-section-title">{t('sidebar_games')}</p>
               {gameData.map(g => (
                 <div key={g.game} className="ps-game-row">
-                  <span className="ps-game-label">{g.game.slice(0, 3)}</span>
+                  <span className="ps-game-label" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t(GAME_LABEL_KEYS[g.game] ?? 'game_other')}</span>
                   <div className="ps-game-track">
                     <div
                       className="ps-game-fill"

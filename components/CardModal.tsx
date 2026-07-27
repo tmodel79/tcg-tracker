@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { numParse, todayISO } from '@/lib/utils'
 import { uploadCardImage } from '@/lib/supabase'
-import { GAMES, FX_DEFAULT } from '@/types/card'
+import { GAMES, FX_DEFAULT, GAME_LABEL_KEYS } from '@/types/card'
 import { useI18n } from '@/lib/i18n'
 import { CameraModal } from './CameraModal'
 import { CardVariantPicker } from './CardVariantPicker'
@@ -35,11 +35,11 @@ interface CardModalProps {
   onDelete: (id: string) => void
 }
 
-const LANGUAGES: { value: Language; label: string; flag: string }[] = [
-  { value: 'JP', label: '일판', flag: '🇯🇵' },
-  { value: 'EN', label: '영판', flag: '🇺🇸' },
-  { value: 'FR', label: '프판', flag: '🇫🇷' },
-  { value: 'KR', label: '한판', flag: '🇰🇷' },
+const LANGUAGES: { value: Language; labelKey: string; flag: string }[] = [
+  { value: 'JP', labelKey: 'lang_jp', flag: '🇯🇵' },
+  { value: 'EN', labelKey: 'lang_en', flag: '🇺🇸' },
+  { value: 'FR', labelKey: 'lang_fr', flag: '🇫🇷' },
+  { value: 'KR', labelKey: 'lang_kr', flag: '🇰🇷' },
 ]
 
 const CURRENCIES: { value: Currency; label: string }[] = [
@@ -161,8 +161,8 @@ export function CardModal({ open, card, prefill, onClose, onSave, onDelete }: Ca
 
   // 시세 조회
   const handlePriceLookup = useCallback(async () => {
-    if (!name.trim()) { setPriceError('카드명을 먼저 입력해주세요'); return }
-    if (!language) { setPriceError('언어판을 선택해주세요'); return }
+    if (!name.trim()) { setPriceError(t('err_name_first')); return }
+    if (!language) { setPriceError(t('err_lang_required')); return }
     setPriceLoading(true)
     setPriceError('')
     setPriceChecked(false)
@@ -179,7 +179,7 @@ export function CardModal({ open, card, prefill, onClose, onSave, onDelete }: Ca
       setPriceResults(json.results || [])
       setPriceChecked(true)
     } catch (e: any) {
-      setPriceError(e.message || '시세 조회 실패')
+      setPriceError(e.message || t('price_lookup_fail'))
     } finally {
       setPriceLoading(false)
     }
@@ -441,7 +441,7 @@ export function CardModal({ open, card, prefill, onClose, onSave, onDelete }: Ca
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: 10 }}>
               <Field label={t('field_game')}>
                 <select style={fieldStyle} value={game} onChange={(e) => setGame(e.target.value as Game)}>
-                  {GAMES.map((g) => <option key={g}>{g}</option>)}
+                  {GAMES.map((g) => <option key={g} value={g}>{t(GAME_LABEL_KEYS[g] ?? 'game_other')}</option>)}
                 </select>
               </Field>
               <Field label={t('field_grade')}>
@@ -462,7 +462,7 @@ export function CardModal({ open, card, prefill, onClose, onSave, onDelete }: Ca
               </Field>
             </div>
             {/* 언어판 선택 */}
-            <Field label="언어판 (시세 조회용)">
+            <Field label={t('field_language_lookup')}>
               <div style={{ display: 'flex', gap: 6 }}>
                 {LANGUAGES.map((l) => (
                   <button
@@ -487,7 +487,7 @@ export function CardModal({ open, card, prefill, onClose, onSave, onDelete }: Ca
                     }}
                   >
                     <span style={{ fontSize: 16 }}>{l.flag}</span>
-                    <span>{l.label}</span>
+                    <span>{t(l.labelKey)}</span>
                   </button>
                 ))}
               </div>
@@ -547,7 +547,7 @@ export function CardModal({ open, card, prefill, onClose, onSave, onDelete }: Ca
           </Section>
 
           {/* ── 마켓 시세 조회 ── */}
-          <Section title="마켓 시세 조회">
+          <Section title={t('sec_market_price')}>
             <div style={{ marginBottom: 10 }}>
               <button
                 onClick={handlePriceLookup}
@@ -570,11 +570,11 @@ export function CardModal({ open, card, prefill, onClose, onSave, onDelete }: Ca
                   transition: 'all 0.15s',
                 }}
               >
-                {priceLoading ? '조회 중…' : '시세 조회하기'}
+                {priceLoading ? t('looking_up') : t('btn_price_lookup')}
               </button>
               {!language && name.trim() && (
                 <p style={{ color: 'var(--muted)', fontSize: 11.5, marginTop: 5, textAlign: 'center' }}>
-                  위에서 언어판을 선택하면 해당 마켓 시세를 조회합니다
+                  {t('lang_select_hint')}
                 </p>
               )}
             </div>
@@ -608,14 +608,14 @@ export function CardModal({ open, card, prefill, onClose, onSave, onDelete }: Ca
                             {r.label}
                             {r.soldCount != null && r.soldCount > 0 && (
                               <span style={{ color: 'var(--muted-2)', fontWeight: 400, marginLeft: 6, fontSize: 11 }}>
-                                최근 {r.soldCount}건
+                                {t('recent_n', { n: r.soldCount })}
                               </span>
                             )}
                           </div>
                           {hasPrice ? (
                             <div>
                               <span className="num" style={{ fontSize: 16, fontWeight: 800, color: 'var(--text)' }}>
-                                {r.price.toLocaleString('ko-KR')}원
+                                ₩{r.price.toLocaleString('ko-KR')}
                               </span>
                               {r.rawPrice && r.currency !== 'KRW' && (
                                 <span style={{ color: 'var(--muted-2)', fontSize: 11, marginLeft: 6 }}>
@@ -638,8 +638,8 @@ export function CardModal({ open, card, prefill, onClose, onSave, onDelete }: Ca
                           ) : (
                             <span style={{ fontSize: 12, color: 'var(--muted-2)' }}>
                               {r.source === 'kream' || r.source === 'bunjang'
-                                ? '직접 확인 필요'
-                                : '가격 정보 없음'}
+                                ? t('check_directly')
+                                : t('no_price_info')}
                             </span>
                           )}
                         </div>
@@ -660,7 +660,7 @@ export function CardModal({ open, card, prefill, onClose, onSave, onDelete }: Ca
                             whiteSpace: 'nowrap',
                           }}
                         >
-                          사이트 열기 →
+                          {t('open_site')}
                         </a>
                       </div>
                     </div>
@@ -668,7 +668,7 @@ export function CardModal({ open, card, prefill, onClose, onSave, onDelete }: Ca
                 })}
 
                 <p style={{ fontSize: 11, color: 'var(--muted-2)', textAlign: 'center', marginTop: 2 }}>
-                  * 원가 대비 수익률 기준 · 환율은 참고값 (USD≈1,380 / JPY≈9.1 / EUR≈1,500)
+                  {t('price_footnote')}
                 </p>
               </div>
             )}

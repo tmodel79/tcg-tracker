@@ -1,7 +1,7 @@
 'use client'
 
 import type { Card, SortMode } from '@/types/card'
-import { GAMES_WITH_ALL } from '@/types/card'
+import { GAMES_WITH_ALL, ALL_GAMES, GAME_LABEL_KEYS } from '@/types/card'
 import { useI18n } from '@/lib/i18n'
 
 interface ControlsProps {
@@ -47,13 +47,13 @@ export function Controls({
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {GAMES_WITH_ALL.map((g) => {
           const cnt =
-            g === '전체'
+            g === ALL_GAMES
               ? cards.length
               : cards.filter((c) => c.game === g).length
-          if (g !== '전체' && cnt === 0) return null
+          if (g !== ALL_GAMES && cnt === 0) return null
           const active = filterGame === g
-          // Display '전체' as the translated label, but keep raw value for logic
-          const displayLabel = g === '전체' ? t('filter_all') : g
+          // 내부 값(한국어/ALL)은 유지하고 표시만 번역
+          const displayLabel = g === ALL_GAMES ? t('filter_all') : t(GAME_LABEL_KEYS[g] ?? 'game_other')
           return (
             <button
               key={g}
@@ -71,7 +71,7 @@ export function Controls({
               }}
             >
               {displayLabel}
-              {g !== '전체' && (
+              {g !== ALL_GAMES && (
                 <span style={{ opacity: 0.6 }}> {cnt}</span>
               )}
             </button>

@@ -3,6 +3,7 @@
 import { calcCard } from '@/lib/calc'
 import { pctCompact } from '@/lib/utils'
 import { useI18n } from '@/lib/i18n'
+import { ALL_GAMES, GAME_LABEL_KEYS } from '@/types/card'
 import type { Card, SortMode } from '@/types/card'
 
 interface CardTableProps {
@@ -26,7 +27,7 @@ export function CardTable({
 
   // 필터 → 검색 → 정렬
   let list = cards.slice()
-  if (filterGame !== '전체') list = list.filter((c) => c.game === filterGame)
+  if (filterGame !== ALL_GAMES) list = list.filter((c) => c.game === filterGame)
   if (searchText) {
     list = list.filter((c) =>
       (c.name || '').toLowerCase().includes(searchText.toLowerCase())
@@ -206,7 +207,7 @@ function CardItem({ card, onClick }: { card: Card; onClick: () => void }) {
             padding: '1px 5px', borderRadius: 5, fontSize: 9.5, fontWeight: 700,
             background: 'var(--panel-3)', color: 'var(--muted)', whiteSpace: 'nowrap',
           }}>
-            {card.game || t('game_other')}
+            {card.game ? t(GAME_LABEL_KEYS[card.game] ?? 'game_other') : t('game_other')}
           </span>
           {card.grade && (
             <span style={{

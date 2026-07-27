@@ -9,7 +9,9 @@
 // ========================================
 
 import { useRef, useState } from 'react'
+import { useI18n } from '@/lib/i18n'
 import type { Currency, Game, Language } from '@/types/card'
+import { GAME_LABEL_KEYS } from '@/types/card'
 import { IconLink, IconCamera, IconEdit, IconFolder, IconDownload } from './Icons'
 
 export interface ImportedData {
@@ -60,6 +62,7 @@ const fieldStyle: React.CSSProperties = {
 const FX_DEFAULT: Record<string, number> = { KRW: 1, USD: 1380, JPY: 9.1, EUR: 1500 }
 
 export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportProps) {
+  const { t } = useI18n()
   const [mode, setMode]           = useState<Mode>('url')
   const [url, setUrl]             = useState('')
   const [loading, setLoading]     = useState(false)
@@ -70,7 +73,7 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
 
   // ── URL 가져오기 ──
   const handleUrlFetch = async () => {
-    if (!url.trim()) { setError('URL을 입력해주세요'); return }
+    if (!url.trim()) { setError(t('err_url_required')); return }
     setLoading(true); setError(''); setResult(null)
     try {
       const res = await fetch('/api/url-import', {
@@ -82,7 +85,7 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
       if (json.error) throw new Error(json.error)
       setResult(json)
     } catch (e: any) {
-      setError(e.message || '가져오기 실패')
+      setError(e.message || t('fetch_fail'))
     } finally {
       setLoading(false)
     }
@@ -90,7 +93,7 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
 
   // ── 스크린샷 OCR ──
   const handleFileSelect = async (file: File) => {
-    if (!file.type.startsWith('image/')) { setError('이미지 파일만 가능합니다'); return }
+    if (!file.type.startsWith('image/')) { setError(t('err_image_only')); return }
     setLoading(true); setError(''); setResult(null)
 
     const reader = new FileReader()
@@ -110,7 +113,7 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
         if (json.error) throw new Error(json.error)
         setResult(json)
       } catch (e: any) {
-        setError(e.message || 'OCR 실패')
+        setError(e.message || t('ocr_fail'))
       } finally {
         setLoading(false)
       }
@@ -147,10 +150,10 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
         <div style={{ marginBottom: 20 }}>
           <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconLink size={16} /></span>
-            구매 가져오기
+            {t('purchase_import_title')}
           </h2>
           <p style={{ margin: 0, color: 'var(--muted)', fontSize: 13 }}>
-            구매한 상품 URL을 붙여넣거나, 영수증 스크린샷을 올리면 자동으로 정보를 추출합니다
+            {t('purchase_import_sub')}
           </p>
         </div>
       )}
@@ -158,8 +161,8 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
       {/* 모드 전환 탭 */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 16, background: 'var(--panel-2)', borderRadius: 10, padding: 4 }}>
         {[
-          { id: 'url' as Mode,        label: 'URL 붙여넣기', Icon: IconLink },
-          { id: 'screenshot' as Mode, label: '영수증 스캔',  Icon: IconCamera },
+          { id: 'url' as Mode,        label: t('mode_url'),     Icon: IconLink },
+          { id: 'screenshot' as Mode, label: t('mode_receipt'), Icon: IconCamera },
         ].map(m => (
           <button
             key={m.id}
@@ -186,7 +189,7 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
           borderRadius: 14, padding: '18px', marginBottom: 16,
         }}>
           <label style={{ display: 'block', fontSize: 11.5, color: 'var(--muted)', marginBottom: 6, fontWeight: 600 }}>
-            상품 URL (eBay · 야후옥션 · 메르카리 지원)
+            {t('url_label')}
           </label>
           <div style={{ display: 'flex', gap: 8 }}>
             <input
@@ -207,11 +210,11 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
                 color: loading || !url.trim() ? 'var(--muted)' : 'var(--accent-ink)',
               }}
             >
-              {loading ? '…' : '가져오기'}
+              {loading ? '…' : t('btn_fetch')}
             </button>
           </div>
           <p style={{ fontSize: 11.5, color: 'var(--muted-2)', marginTop: 8, marginBottom: 0 }}>
-            상품 상세 페이지 URL을 복사해서 붙여넣으면 카드명·가격·수수료·배송비를 자동으로 읽어옵니다
+            {t('url_hint')}
           </p>
         </div>
       )}
@@ -238,7 +241,7 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
             <div style={{ position: 'relative', marginBottom: 12 }}>
               <img
                 src={ocrPreview}
-                alt="영수증 미리보기"
+                alt="receipt preview"
                 style={{ width: '100%', maxHeight: 240, objectFit: 'contain', borderRadius: 8, border: '1px solid var(--border)' }}
               />
               {loading && (
@@ -248,7 +251,7 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
                   borderRadius: 8, gap: 8,
                 }}>
                   <div style={{ width: 28, height: 28, border: '3px solid rgba(232,177,58,0.3)', borderTop: '3px solid #e8b13a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                  <span style={{ color: '#e8b13a', fontSize: 13, fontWeight: 600 }}>AI 분석 중…</span>
+                  <span style={{ color: '#e8b13a', fontSize: 13, fontWeight: 600 }}>{t('ai_analyzing')}</span>
                 </div>
               )}
             </div>
@@ -269,9 +272,9 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
               }}
             >
               <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'center', color: 'var(--muted)' }}><IconCamera size={30} strokeWidth={1.6} /></div>
-              <div style={{ fontWeight: 700, marginBottom: 4 }}>스크린샷을 여기에 드래그하거나 클릭하세요</div>
+              <div style={{ fontWeight: 700, marginBottom: 4 }}>{t('screenshot_drop')}</div>
               <div style={{ fontSize: 12, color: 'var(--muted-2)' }}>
-                eBay 주문확인 · 야후옥션 낙찰통보 · 메르카리 구매완료 등
+                {t('screenshot_examples')}
               </div>
             </div>
           )}
@@ -287,11 +290,11 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
               color: loading ? 'var(--muted)' : 'var(--text)',
             }}
           >
-            {ocrPreview ? '다른 이미지 선택' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, justifyContent: 'center', width: '100%' }}><IconFolder size={13} /> 이미지 파일 선택</span>}
+            {ocrPreview ? t('btn_other_image') : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, justifyContent: 'center', width: '100%' }}><IconFolder size={13} /> {t('btn_select_image')}</span>}
           </button>
 
           <p style={{ fontSize: 11.5, color: 'var(--muted-2)', marginTop: 8, marginBottom: 0 }}>
-            구매 확인서 스크린샷을 올리면 AI가 카드명·구매가·수수료·배송비를 자동으로 읽어옵니다
+            {t('receipt_hint')}
           </p>
         </div>
       )}
@@ -313,28 +316,28 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
           borderRadius: 14, padding: '18px', marginBottom: 14,
         }}>
           <div style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 14 }}>
-            ✅ 추출 결과 {result.platform && `— ${result.platform}`}
+            ✅ {t('extract_result')} {result.platform && `— ${result.platform}`}
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 14px', marginBottom: 16 }}>
-            <ResultRow label="카드명" value={result.name} />
-            <ResultRow label="카드번호" value={result.card_number} />
-            <ResultRow label="게임" value={result.game} />
-            <ResultRow label="통화" value={result.currency} />
+            <ResultRow label={t('label_name')} value={result.name} />
+            <ResultRow label={t('label_number')} value={result.card_number} />
+            <ResultRow label={t('field_game')} value={result.game ? t(GAME_LABEL_KEYS[result.game] ?? 'game_other') : null} />
+            <ResultRow label={t('field_currency')} value={result.currency} />
             <ResultRow
-              label="구매가"
+              label={t('field_buy_price')}
               value={result.buy_price != null
                 ? `${result.currency === 'USD' ? '$' : result.currency === 'JPY' ? '¥' : result.currency === 'EUR' ? '€' : '₩'}${result.buy_price.toLocaleString()}`
                 : null}
             />
             <ResultRow
-              label="수수료"
+              label={t('label_fee')}
               value={result.fee != null
                 ? `${result.currency === 'USD' ? '$' : result.currency === 'JPY' ? '¥' : result.currency === 'EUR' ? '€' : '₩'}${result.fee.toLocaleString()}`
                 : null}
             />
             <ResultRow
-              label="배송비"
+              label={t('label_shipping')}
               value={result.shipping != null
                 ? `${result.currency === 'USD' ? '$' : result.currency === 'JPY' ? '¥' : result.currency === 'EUR' ? '€' : '₩'}${result.shipping.toLocaleString()}`
                 : null}
@@ -345,7 +348,7 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
             background: 'var(--panel-2)', borderRadius: 8, padding: '9px 12px',
             fontSize: 12, color: 'var(--muted)', marginBottom: 14,
           }}>
-            💡 배대지(배송대행) 비용은 카드 추가 후 모달에서 직접 입력하실 수 있습니다
+            💡 {t('forwarding_note')}
           </div>
 
           <button
@@ -357,7 +360,7 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
             }}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, justifyContent: 'center', width: '100%' }}>
-              <IconDownload size={14} /> 이 카드 추가하기
+              <IconDownload size={14} /> {t('btn_add_this_card')}
             </span>
           </button>
         </div>
@@ -369,10 +372,9 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
         background: 'var(--panel-2)', border: '1px solid var(--border)',
         borderRadius: 12, padding: '14px 16px',
       }}>
-        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}><IconEdit size={13} /> 직접 수동 입력</div>
+        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}><IconEdit size={13} /> {t('add_manual_title')}</div>
         <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 10 }}>
-          지원하지 않는 사이트거나 직접 입력하고 싶으시면 카드 추가 버튼을 사용하세요.
-          수수료·배대지·배송비도 모두 직접 입력 가능합니다.
+          {t('manual_entry_desc')}
         </div>
         <button
           onClick={() => onAddCard({})}
@@ -382,7 +384,7 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
             color: 'var(--text)', cursor: 'pointer', fontFamily: 'inherit',
           }}
         >
-          + 카드 직접 추가
+          {t('btn_manual_add')}
         </button>
       </div>
       )}
@@ -393,13 +395,14 @@ export function PurchaseImport({ onAddCard, embedded = false }: PurchaseImportPr
 }
 
 function ResultRow({ label, value }: { label: string; value: string | null | undefined }) {
+  const { t } = useI18n()
   return (
     <div>
       <div style={{ fontSize: 10.5, color: 'var(--muted-2)', fontWeight: 700, marginBottom: 2, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
         {label}
       </div>
       <div style={{ fontSize: 14, fontWeight: 600, color: value ? 'var(--text)' : 'var(--muted-2)', fontStyle: value ? 'normal' : 'italic' }}>
-        {value ?? '인식 안 됨'}
+        {value ?? t('not_detected')}
       </div>
     </div>
   )

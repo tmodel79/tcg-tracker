@@ -5,15 +5,16 @@
 // ========================================
 
 import { useState } from 'react'
-import { GAMES } from '@/types/card'
+import { GAMES, GAME_LABEL_KEYS } from '@/types/card'
+import { useI18n } from '@/lib/i18n'
 import type { Game, Language } from '@/types/card'
 import { IconSearch, IconStar } from './Icons'
 
-const LANGUAGES: { value: Language; label: string; flag: string }[] = [
-  { value: 'JP', label: '일판', flag: '🇯🇵' },
-  { value: 'EN', label: '영판', flag: '🇺🇸' },
-  { value: 'FR', label: '프판', flag: '🇫🇷' },
-  { value: 'KR', label: '한판', flag: '🇰🇷' },
+const LANGUAGES: { value: Language; labelKey: string; flag: string }[] = [
+  { value: 'JP', labelKey: 'lang_jp', flag: '🇯🇵' },
+  { value: 'EN', labelKey: 'lang_en', flag: '🇺🇸' },
+  { value: 'FR', labelKey: 'lang_fr', flag: '🇫🇷' },
+  { value: 'KR', labelKey: 'lang_kr', flag: '🇰🇷' },
 ]
 
 interface PriceResult {
@@ -42,6 +43,7 @@ const fieldStyle: React.CSSProperties = {
 }
 
 export function PriceSearch() {
+  const { t } = useI18n()
   const [cardName, setCardName]     = useState('')
   const [cardNumber, setCardNumber] = useState('')
   const [game, setGame]             = useState<Game>('원피스')
@@ -52,7 +54,7 @@ export function PriceSearch() {
   const [searched, setSearched]     = useState(false)
 
   const handleSearch = async () => {
-    if (!cardName.trim()) { setError('카드명을 입력해주세요'); return }
+    if (!cardName.trim()) { setError(t('err_name_required')); return }
     setLoading(true)
     setError('')
     setSearched(false)
@@ -69,7 +71,7 @@ export function PriceSearch() {
       setResults(json.results || [])
       setSearched(true)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : '검색 실패')
+      setError(e instanceof Error ? e.message : t('search_fail'))
     } finally {
       setLoading(false)
     }
@@ -87,10 +89,10 @@ export function PriceSearch() {
       <div style={{ marginBottom: 20 }}>
         <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconSearch size={17} strokeWidth={2.2} /></span>
-          시세 검색
+          {t('tab_search')}
         </h2>
         <p style={{ margin: 0, color: 'var(--muted)', fontSize: 13 }}>
-          카드명을 검색하면 eBay·TCGPlayer·130point·KREAM·번개장터 가격을 한눈에 비교합니다
+          {t('price_search_sub')}
         </p>
       </div>
 
@@ -106,26 +108,26 @@ export function PriceSearch() {
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 10, marginBottom: 12 }}>
           <div>
             <label style={{ display: 'block', fontSize: 11.5, color: 'var(--muted)', marginBottom: 5, fontWeight: 600 }}>
-              카드명 *
+              {t('field_card_name')}
             </label>
             <input
               style={fieldStyle}
               value={cardName}
               onChange={e => setCardName(e.target.value)}
-              placeholder="예: Monkey D. Luffy"
+              placeholder={`${t('ex')}: Monkey D. Luffy`}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
               autoFocus
             />
           </div>
           <div>
             <label style={{ display: 'block', fontSize: 11.5, color: 'var(--muted)', marginBottom: 5, fontWeight: 600 }}>
-              카드번호 (선택)
+              {t('field_card_number_opt')}
             </label>
             <input
               style={fieldStyle}
               value={cardNumber}
               onChange={e => setCardNumber(e.target.value)}
-              placeholder="예: OP01-001"
+              placeholder={`${t('ex')}: OP01-001`}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
             />
           </div>
@@ -135,15 +137,15 @@ export function PriceSearch() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
           <div>
             <label style={{ display: 'block', fontSize: 11.5, color: 'var(--muted)', marginBottom: 5, fontWeight: 600 }}>
-              게임
+              {t('field_game')}
             </label>
             <select style={fieldStyle} value={game} onChange={e => setGame(e.target.value as Game)}>
-              {GAMES.filter(g => g !== '기타').map(g => <option key={g} value={g}>{g}</option>)}
+              {GAMES.filter(g => g !== '기타').map(g => <option key={g} value={g}>{t(GAME_LABEL_KEYS[g] ?? 'game_other')}</option>)}
             </select>
           </div>
           <div>
             <label style={{ display: 'block', fontSize: 11.5, color: 'var(--muted)', marginBottom: 5, fontWeight: 600 }}>
-              언어판
+              {t('field_language')}
             </label>
             <div style={{ display: 'flex', gap: 5 }}>
               {LANGUAGES.map(l => (
@@ -161,7 +163,7 @@ export function PriceSearch() {
                   }}
                 >
                   <span style={{ fontSize: 14 }}>{l.flag}</span>
-                  <span>{l.label}</span>
+                  <span>{t(l.labelKey)}</span>
                 </button>
               ))}
             </div>
@@ -181,7 +183,7 @@ export function PriceSearch() {
             transition: 'all 0.15s',
           }}
         >
-          {loading ? '검색 중…' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, justifyContent: 'center', width: '100%' }}><IconSearch size={14} /> 시세 검색</span>}
+          {loading ? t('searching') : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, justifyContent: 'center', width: '100%' }}><IconSearch size={14} /> {t('tab_search')}</span>}
         </button>
 
         {error && (
@@ -206,13 +208,13 @@ export function PriceSearch() {
             }}>
               <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconStar size={17} /></span>
               <div>
-                <div style={{ fontSize: 11.5, color: 'var(--accent)', fontWeight: 700 }}>최저가</div>
+                <div style={{ fontSize: 11.5, color: 'var(--accent)', fontWeight: 700 }}>{t('lowest_price')}</div>
                 <div className="num" style={{ fontSize: 20, fontWeight: 800, color: 'var(--accent)' }}>
-                  {cheapestPrice.toLocaleString('ko-KR')}원
+                  ₩{cheapestPrice.toLocaleString('ko-KR')}
                 </div>
               </div>
               <div style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--muted)' }}>
-                {language === 'KR' ? '직접 확인 필요' : `${pricedResults.find(r => r.price === cheapestPrice)?.label}`}
+                {language === 'KR' ? t('check_directly') : `${pricedResults.find(r => r.price === cheapestPrice)?.label}`}
               </div>
             </div>
           )}
@@ -241,7 +243,7 @@ export function PriceSearch() {
                       background: 'var(--accent)', color: 'var(--accent-ink)',
                       fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 6,
                     }}>
-                      최저가
+                      {t('lowest_price')}
                     </span>
                   )}
 
@@ -251,14 +253,14 @@ export function PriceSearch() {
                       {r.label}
                       {r.soldCount != null && r.soldCount > 0 && (
                         <span style={{ color: 'var(--muted-2)', fontWeight: 400, marginLeft: 6, fontSize: 11 }}>
-                          최근 {r.soldCount}건 평균
+                          {t('recent_n_avg', { n: r.soldCount })}
                         </span>
                       )}
                     </div>
                     {r.price != null ? (
                       <div>
                         <span className="num" style={{ fontSize: 20, fontWeight: 800 }}>
-                          {r.price.toLocaleString('ko-KR')}원
+                          ₩{r.price.toLocaleString('ko-KR')}
                         </span>
                         {r.rawPrice != null && r.currency !== 'KRW' && (
                           <span style={{ color: 'var(--muted-2)', fontSize: 12, marginLeft: 6 }}>
@@ -270,8 +272,8 @@ export function PriceSearch() {
                     ) : (
                       <span style={{ fontSize: 12.5, color: 'var(--muted-2)', fontStyle: 'italic' }}>
                         {r.source === 'kream' || r.source === 'bunjang'
-                          ? '사이트에서 직접 확인'
-                          : '가격 정보 없음 — 링크에서 확인'}
+                          ? t('check_on_site')
+                          : t('no_price_check_link')}
                       </span>
                     )}
                   </div>
@@ -294,7 +296,7 @@ export function PriceSearch() {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    사이트 열기 →
+                    {t('open_site')}
                   </a>
                 </div>
               )
@@ -302,7 +304,7 @@ export function PriceSearch() {
           </div>
 
           <p style={{ fontSize: 11, color: 'var(--muted-2)', textAlign: 'center', marginTop: 14 }}>
-            * 환율 참고값: USD≈1,380 / JPY≈9.1 / EUR≈1,500 · 실제 시세와 다를 수 있습니다
+            {t('fx_disclaimer')}
           </p>
         </div>
       )}
@@ -310,8 +312,8 @@ export function PriceSearch() {
       {searched && results.length === 0 && (
         <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--muted)' }}>
           <div style={{ fontSize: 32, marginBottom: 10 }}>🔎</div>
-          <div style={{ fontWeight: 600 }}>검색 결과가 없습니다</div>
-          <div style={{ fontSize: 12.5, marginTop: 6 }}>카드명을 영어로 입력하거나 카드번호를 추가해보세요</div>
+          <div style={{ fontWeight: 600 }}>{t('no_results')}</div>
+          <div style={{ fontSize: 12.5, marginTop: 6 }}>{t('no_results_hint')}</div>
         </div>
       )}
     </div>

@@ -39,6 +39,7 @@ function fmtKrw(v: number) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function CustomTooltip({ active, payload, label }: any) {
+  const { t } = useI18n()
   if (!active || !payload?.length) return null
   const value = payload[0]?.value
   const cost  = payload[1]?.value
@@ -57,16 +58,16 @@ function CustomTooltip({ active, payload, label }: any) {
     }}>
       <div style={{ color: 'var(--muted-2)', marginBottom: 6, fontWeight: 700 }}>{label}</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 3 }}>
-        <span style={{ color: 'var(--muted)' }}>가치</span>
+        <span style={{ color: 'var(--muted)' }}>{t('chart_value')}</span>
         <span className="num" style={{ fontWeight: 800 }}>{fmtKrw(value)}</span>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 3 }}>
-        <span style={{ color: 'var(--muted)' }}>투자</span>
+        <span style={{ color: 'var(--muted)' }}>{t('mobile_invest')}</span>
         <span className="num" style={{ fontWeight: 700, color: 'var(--muted)' }}>{fmtKrw(cost)}</span>
       </div>
       <div style={{ borderTop: '1px solid var(--border-soft)', marginTop: 6, paddingTop: 6 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
-          <span style={{ color: 'var(--muted)' }}>손익</span>
+          <span style={{ color: 'var(--muted)' }}>{t('col_pnl')}</span>
           <span className="num" style={{ fontWeight: 800, color: isGain ? 'var(--gain)' : 'var(--loss)' }}>
             {isGain ? '+' : '−'}{fmtKrw(Math.abs(pnl))} ({isGain ? '+' : '-'}{pct}%)
           </span>
@@ -77,7 +78,7 @@ function CustomTooltip({ active, payload, label }: any) {
 }
 
 export function PortfolioChart({ cards, onSaveSnapshot }: PortfolioChartProps) {
-  const { fmtC } = useI18n()
+  const { fmtC, t } = useI18n()
   const [snapshots, setSnapshots] = useState<Snapshot[]>([])
   const [saving, setSaving] = useState(false)
   const [range, setRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d')
@@ -138,7 +139,7 @@ export function PortfolioChart({ cards, onSaveSnapshot }: PortfolioChartProps) {
       cost: s.total_cost_krw,
     })),
     ...(summary.pricedCards > 0 ? [{
-      date: '지금',
+      date: t('now_label'),
       value: summary.value,
       cost: summary.invest,
     }] : []),
@@ -160,7 +161,7 @@ export function PortfolioChart({ cards, onSaveSnapshot }: PortfolioChartProps) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <div>
           <div style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--muted-2)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>
-            포트폴리오 가치
+            {t('portfolio_value')}
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
             <span className="num" style={{ fontSize: 20, fontWeight: 800 }}>
@@ -178,7 +179,7 @@ export function PortfolioChart({ cards, onSaveSnapshot }: PortfolioChartProps) {
         <button
           onClick={handleSave}
           disabled={saving || summary.pricedCards === 0}
-          title="현재 시세를 기록합니다"
+          title={t('record_tooltip')}
           style={{
             padding: '5px 10px',
             borderRadius: 8,
@@ -192,7 +193,7 @@ export function PortfolioChart({ cards, onSaveSnapshot }: PortfolioChartProps) {
             whiteSpace: 'nowrap',
           }}
         >
-          {saving ? '저장 중…' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><IconPin size={11} /> 기록</span>}
+          {saving ? t('saving') : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><IconPin size={11} /> {t('record')}</span>}
         </button>
       </div>
 
@@ -211,7 +212,7 @@ export function PortfolioChart({ cards, onSaveSnapshot }: PortfolioChartProps) {
                 color: range === r ? 'var(--accent)' : 'var(--muted)',
               }}
             >
-              {r === 'all' ? '전체' : r}
+              {r === 'all' ? t('filter_all') : r}
             </button>
           ))}
         </div>
@@ -251,11 +252,11 @@ export function PortfolioChart({ cards, onSaveSnapshot }: PortfolioChartProps) {
         }}>
           <div style={{ fontSize: 12, color: 'var(--muted-2)' }}>
             {summary.pricedCards === 0
-              ? '카드에 현재가를 입력한 뒤 기록 버튼을 누르세요'
-              : '기록 버튼을 눌러 첫 데이터를 저장하세요'}
+              ? t('chart_empty_1')
+              : t('chart_empty_2')}
           </div>
           <div style={{ fontSize: 10.5, color: 'var(--muted-2)', opacity: 0.6 }}>
-            기록이 쌓이면 시세 변화 차트가 표시됩니다
+            {t('chart_empty_sub')}
           </div>
         </div>
       )}

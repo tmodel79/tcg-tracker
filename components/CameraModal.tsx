@@ -2,6 +2,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useI18n } from '@/lib/i18n'
 
 export type CardType = 'raw' | 'graded'
 
@@ -26,6 +27,7 @@ const RATIOS: Record<CardType, number> = {
 }
 
 export function CameraModal({ open, onClose, onCapture }: CameraModalProps) {
+  const { t } = useI18n()
   const videoRef = useRef<HTMLVideoElement>(null)
   const overlayRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -54,11 +56,12 @@ export function CameraModal({ open, onClose, onCapture }: CameraModalProps) {
     } catch (e: any) {
       setCameraError(
         e.name === 'NotAllowedError'
-          ? '카메라 권한을 허용해 주세요.'
-          : `카메라를 열 수 없습니다: ${e.message}`
+          ? t('camera_perm')
+          : t('camera_open_fail', { msg: e.message })
       )
     }
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t])
 
   // 카메라 중지
   const stopCamera = useCallback(() => {
@@ -141,12 +144,13 @@ export function CameraModal({ open, onClose, onCapture }: CameraModalProps) {
     ctx.fillStyle = 'rgba(232,177,58,0.9)'
     ctx.textAlign = 'center'
     ctx.fillText(
-      cardType === 'raw' ? '📄 RAW 카드를 프레임에 맞춰 주세요' : '🏷️ 등급 슬랩을 프레임에 맞춰 주세요',
+      cardType === 'raw' ? `📄 ${t('frame_raw')}` : `🏷️ ${t('frame_graded')}`,
       cw / 2, gy - 12
     )
 
     animRef.current = requestAnimationFrame(drawOverlay)
-  }, [cardType])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cardType, t])
 
   useEffect(() => {
     if (!open) return
@@ -218,7 +222,7 @@ export function CameraModal({ open, onClose, onCapture }: CameraModalProps) {
       })
       const ocrResult = await res.json()
       if (ocrResult.error) {
-        setErrMsg(`OCR 오류: ${ocrResult.error}`)
+        setErrMsg(t('ocr_error', { msg: ocrResult.error }))
         setStatus('done')
         // OCR 실패해도 이미지는 전달
         onCapture(dataUrl, undefined)
@@ -227,7 +231,7 @@ export function CameraModal({ open, onClose, onCapture }: CameraModalProps) {
         onCapture(dataUrl, ocrResult)
       }
     } catch (e: any) {
-      setErrMsg(`네트워크 오류: ${e.message}`)
+      setErrMsg(t('network_error', { msg: e.message }))
       setStatus('done')
       onCapture(dataUrl, undefined)
     }
@@ -255,7 +259,7 @@ export function CameraModal({ open, onClose, onCapture }: CameraModalProps) {
     >
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14, width: '100%', maxWidth: 520, padding: '0 16px' }}>
-        <span style={{ color: '#fff', fontWeight: 700, fontSize: 15, flex: 1 }}>카드 스캔</span>
+        <span style={{ color: '#fff', fontWeight: 700, fontSize: 15, flex: 1 }}>{t('card_scan')}</span>
         <button
           onClick={onClose}
           style={{ background: 'none', border: 'none', color: '#aaa', fontSize: 22, cursor: 'pointer', lineHeight: 1 }}
@@ -306,7 +310,7 @@ export function CameraModal({ open, onClose, onCapture }: CameraModalProps) {
           }}>
             <div style={{ width: 32, height: 32, border: '3px solid rgba(232,177,58,0.3)', borderTop: '3px solid #e8b13a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
             <span style={{ color: '#e8b13a', fontSize: 13, fontWeight: 600 }}>
-              {status === 'ocr' ? 'AI 인식 중…' : '처리 중…'}
+              {status === 'ocr' ? t('ai_analyzing') : t('loading')}
             </span>
           </div>
         )}
@@ -318,18 +322,18 @@ export function CameraModal({ open, onClose, onCapture }: CameraModalProps) {
         {/* 카드 타입 토글 */}
         {!captured && (
           <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-            {(['raw', 'graded'] as CardType[]).map((t) => (
+            {(['raw', 'graded'] as CardType[]).map((ct) => (
               <button
-                key={t}
-                onClick={() => setCardType(t)}
+                key={ct}
+                onClick={() => setCardType(ct)}
                 style={{
                   flex: 1, padding: '8px 0', borderRadius: 9, fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none',
-                  background: cardType === t ? 'var(--accent, #e8b13a)' : 'rgba(255,255,255,0.1)',
-                  color: cardType === t ? '#111' : '#ccc',
+                  background: cardType === ct ? 'var(--accent, #e8b13a)' : 'rgba(255,255,255,0.1)',
+                  color: cardType === ct ? '#111' : '#ccc',
                   transition: 'all 0.15s',
                 }}
               >
-                {t === 'raw' ? '📄 RAW 카드' : '🏷️ 등급 카드'}
+                {ct === 'raw' ? `📄 ${t('raw_card')}` : `🏷️ ${t('graded_card')}`}
               </button>
             ))}
           </div>
@@ -344,8 +348,8 @@ export function CameraModal({ open, onClose, onCapture }: CameraModalProps) {
             style={{ width: 16, height: 16, accentColor: '#e8b13a' }}
           />
           <span>
-            자동 인식 (AI가 카드명·번호 자동으로 읽기)
-            <span style={{ color: '#666', fontSize: 11.5, marginLeft: 6 }}>서버에 ANTHROPIC_API_KEY 필요</span>
+            {t('auto_ocr_label')}
+            <span style={{ color: '#666', fontSize: 11.5, marginLeft: 6 }}>{t('auto_ocr_note')}</span>
           </span>
         </label>
 
@@ -365,7 +369,7 @@ export function CameraModal({ open, onClose, onCapture }: CameraModalProps) {
               opacity: cameraError ? 0.4 : 1,
             }}
           >
-            📸 촬영
+            📸 {t('btn_capture')}
           </button>
         ) : (
           <div style={{ display: 'flex', gap: 8 }}>
@@ -373,14 +377,14 @@ export function CameraModal({ open, onClose, onCapture }: CameraModalProps) {
               onClick={handleRetry}
               style={{ flex: 1, padding: '11px 0', borderRadius: 10, fontSize: 14, fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#ccc', border: 'none', cursor: 'pointer' }}
             >
-              재촬영
+              {t('btn_retake')}
             </button>
             {status === 'done' && (
               <button
                 onClick={() => onCapture(captured!)}
                 style={{ flex: 2, padding: '11px 0', borderRadius: 10, fontSize: 14, fontWeight: 700, background: '#e8b13a', color: '#111', border: 'none', cursor: 'pointer' }}
               >
-                이 사진 사용
+                {t('btn_use_photo')}
               </button>
             )}
           </div>
