@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ history: data })
   }
 
-  return NextResponse.json({ error: 'cardId 또는 portfolio=1 파라미터 필요' }, { status: 400 })
+  return NextResponse.json({ error: 'cardId or portfolio=1 parameter is required' }, { status: 400 })
 }
 
 // ── POST ──────────────────────────────────────────
