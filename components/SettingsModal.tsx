@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 import { useI18n, LOCALE_NAMES } from '@/lib/i18n'
 import type { Locale } from '@/lib/i18n'
 import { CURRENCIES, CurrencyCode } from '@/lib/currency'
+import { getSession, signOut } from '@/lib/supabase'
 import { IconX } from './Icons'
 
 const LOCALES = Object.keys(LOCALE_NAMES) as Locale[]
@@ -30,6 +31,8 @@ interface SettingsModalProps {
 export function SettingsModal({ open, onClose }: SettingsModalProps) {
   const { locale, setLocale, currency, setCurrency, t } = useI18n()
   const [theme, setTheme] = useState<Theme>('dark')
+  const [email, setEmail] = useState<string | null>(null)
+  const [signingOut, setSigningOut] = useState(false)
 
   // 마운트 시 저장된 테마 불러오기 (data-theme은 layout inline script가 이미 설정)
   useEffect(() => {
@@ -38,6 +41,24 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       if (stored === 'dark' || stored === 'gray') setTheme(stored)
     } catch { /* ignore */ }
   }, [])
+
+  // 열릴 때마다 로그인된 이메일 표시
+  useEffect(() => {
+    if (!open) return
+    getSession()
+      .then((session) => setEmail(session?.user?.email ?? null))
+      .catch(() => setEmail(null))
+  }, [open])
+
+  const handleLogout = async () => {
+    if (signingOut) return
+    setSigningOut(true)
+    try {
+      await signOut()
+    } finally {
+      setSigningOut(false)
+    }
+  }
 
   // Escape로 닫기
   useEffect(() => {
@@ -143,7 +164,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
         </div>
 
         {/* ── 테마 ── */}
-        <div>
+        <div style={{ marginBottom: email ? 18 : 0 }}>
           <p style={sectionTitle}>{t('settings_theme')}</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
             <button style={optionStyle(theme === 'dark')} onClick={() => pickTheme('dark')}>
@@ -154,6 +175,36 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             </button>
           </div>
         </div>
+
+        {/* ── 계정 (로그인 이메일 · 로그아웃) ── */}
+        {email && (
+          <div style={{ paddingTop: 16, borderTop: '1px solid var(--border-soft)' }}>
+            <p style={sectionTitle}>{t('settings_account')}</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+              <span style={{ fontSize: 12.5, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {email}
+              </span>
+              <button
+                onClick={handleLogout}
+                disabled={signingOut}
+                style={{
+                  flexShrink: 0,
+                  padding: '7px 12px',
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: signingOut ? 'not-allowed' : 'pointer',
+                  fontFamily: 'inherit',
+                  background: 'var(--panel-2)',
+                  color: 'var(--muted)',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                {t('auth_logout_btn')}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
