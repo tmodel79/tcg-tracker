@@ -4,11 +4,20 @@
 // 시세 검색 탭 — 카드 검색 → 마켓별 가격 비교
 // ========================================
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { GAMES, GAME_LABEL_KEYS } from '@/types/card'
 import { useI18n } from '@/lib/i18n'
 import type { Game, Language } from '@/types/card'
 import { IconSearch, IconStar } from './Icons'
+import {
+  loadWatchlist,
+  upsertWatchlistItem,
+  removeWatchlistItem,
+  toggleWatchlistAlert,
+  logSearch,
+  loadRecentSearches,
+  type WatchlistItem,
+} from '@/lib/supabase'
 
 const LANGUAGES: { value: Language; labelKey: string; flag: string }[] = [
   { value: 'JP', labelKey: 'lang_jp', flag: '🇯🇵' },
@@ -53,14 +62,50 @@ export function PriceSearch() {
   const [error, setError]           = useState('')
   const [searched, setSearched]     = useState(false)
 
-  const handleSearch = async () => {
-    if (!cardName.trim()) { setError(t('err_name_required')); return }
+  // 실제로 검색이 실행된 카드 정보 (입력 폼 값이 바뀌어도 결과 화면과 매칭이 어긋나지 않도록 별도 보관)
+  const [searchedCardName, setSearchedCardName]     = useState('')
+  const [searchedCardNumber, setSearchedCardNumber] = useState('')
+  const [searchedGame, setSearchedGame]             = useState<Game>('원피스')
+
+  // 관심목록(찜) + 알림
+  const [watchlist, setWatchlist]   = useState<WatchlistItem[]>([])
+  const [watchBusy, setWatchBusy]   = useState(false)
+  const [toast, setToast]           = useState('')
+
+  // 최근 검색어
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
+  const [nameFocused, setNameFocused]       = useState(false)
+
+  // 마운트 시 관심목록 + 최근 검색어 로드 (비로그인 상태면 조용히 무시)
+  useEffect(() => {
+    let mounted = true
+    loadWatchlist()
+      .then(list => { if (mounted) setWatchlist(list) })
+      .catch(() => { /* 비로그인 또는 조회 실패 — 관심목록 기능만 비활성 상태로 둔다 */ })
+    loadRecentSearches()
+      .then(list => { if (mounted) setRecentSearches(list) })
+      .catch(() => { /* 비로그인 또는 조회 실패 — 최근 검색어 없이 진행 */ })
+    return () => { mounted = false }
+  }, [])
+
+  // 토스트 자동 소멸
+  useEffect(() => {
+    if (!toast) return
+    const timer = setTimeout(() => setToast(''), 2600)
+    return () => clearTimeout(timer)
+  }, [toast])
+
+  const handleSearch = async (queryOverride?: string) => {
+    const name = (queryOverride ?? cardName).trim()
+    if (!name) { setError(t('err_name_required')); return }
+    if (queryOverride !== undefined) setCardName(queryOverride)
+    logSearch(name, game) // best-effort — 실패해도 검색 흐름을 막지 않음
     setLoading(true)
     setError('')
     setSearched(false)
     try {
       const params = new URLSearchParams({
-        name: cardName.trim(),
+        name,
         game,
         lang: language,
         ...(cardNumber.trim() ? { cardNumber: cardNumber.trim() } : {}),
@@ -69,6 +114,9 @@ export function PriceSearch() {
       const json = await res.json()
       if (json.error) throw new Error(json.error)
       setResults(json.results || [])
+      setSearchedCardName(name)
+      setSearchedCardNumber(cardNumber.trim())
+      setSearchedGame(game)
       setSearched(true)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : t('search_fail'))
@@ -83,17 +131,83 @@ export function PriceSearch() {
     ? Math.min(...pricedResults.map(r => r.price!))
     : null
 
+  // 현재 검색된 카드가 관심목록에 있는지 매칭
+  const currentWatchItem = watchlist.find(w =>
+    w.card_name.trim().toLowerCase() === searchedCardName.trim().toLowerCase() &&
+    (w.game ?? '') === searchedGame &&
+    (w.card_number ?? '').trim().toLowerCase() === searchedCardNumber.trim().toLowerCase()
+  )
+  const alertCount = watchlist.filter(w => w.alert_enabled).length
+
+  const handleAuthErr = (e: unknown) => {
+    const msg = e instanceof Error ? e.message : ''
+    setToast(msg === 'Login required' ? t('login_required') : t('watchlist_action_fail'))
+  }
+
+  const handleToggleWatch = async () => {
+    if (watchBusy) return
+    setWatchBusy(true)
+    try {
+      if (currentWatchItem) {
+        await removeWatchlistItem(currentWatchItem.id)
+        setWatchlist(prev => prev.filter(w => w.id !== currentWatchItem.id))
+        setToast(t('watchlist_removed'))
+      } else {
+        const created = await upsertWatchlistItem({
+          card_name: searchedCardName,
+          game: searchedGame,
+          card_number: searchedCardNumber || null,
+          target_price: cheapestPrice,
+          alert_enabled: false,
+        })
+        setWatchlist(prev => [created, ...prev])
+        setToast(t('watchlist_added'))
+      }
+    } catch (e) {
+      handleAuthErr(e)
+    } finally {
+      setWatchBusy(false)
+    }
+  }
+
+  const handleToggleAlert = async () => {
+    if (!currentWatchItem || watchBusy) return
+    const next = !currentWatchItem.alert_enabled
+    setWatchBusy(true)
+    try {
+      await toggleWatchlistAlert(currentWatchItem.id, next)
+      setWatchlist(prev => prev.map(w => w.id === currentWatchItem.id ? { ...w, alert_enabled: next } : w))
+      setToast(next ? t('alert_turned_on') : t('alert_turned_off'))
+    } catch (e) {
+      handleAuthErr(e)
+    } finally {
+      setWatchBusy(false)
+    }
+  }
+
+  const showRecentChips = (nameFocused || cardName.trim() === '') && recentSearches.length > 0
+
   return (
     <div>
       {/* 제목 */}
-      <div style={{ marginBottom: 20 }}>
-        <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconSearch size={17} strokeWidth={2.2} /></span>
-          {t('tab_search')}
-        </h2>
-        <p style={{ margin: 0, color: 'var(--muted)', fontSize: 13 }}>
-          {t('price_search_sub')}
-        </p>
+      <div style={{ marginBottom: 20, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+        <div>
+          <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconSearch size={17} strokeWidth={2.2} /></span>
+            {t('tab_search')}
+          </h2>
+          <p style={{ margin: 0, color: 'var(--muted)', fontSize: 13 }}>
+            {t('price_search_sub')}
+          </p>
+        </div>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
+          background: 'var(--panel-2)', border: '1px solid var(--border)', borderRadius: 10,
+          padding: '7px 12px', fontSize: 11.5, fontWeight: 700, color: 'var(--muted)', whiteSpace: 'nowrap',
+        }}>
+          <span>🔔</span>
+          <span style={{ color: 'var(--accent)', fontWeight: 800 }}>{t('alert_chip_label', { n: alertCount })}</span>
+        </div>
       </div>
 
       {/* 검색 폼 */}
@@ -116,6 +230,8 @@ export function PriceSearch() {
               onChange={e => setCardName(e.target.value)}
               placeholder={`${t('ex')}: Monkey D. Luffy`}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              onFocus={() => setNameFocused(true)}
+              onBlur={() => setNameFocused(false)}
               autoFocus
             />
           </div>
@@ -132,6 +248,30 @@ export function PriceSearch() {
             />
           </div>
         </div>
+
+        {/* 최근 검색어 칩 */}
+        {showRecentChips && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: -4, marginBottom: 12 }}>
+            <span style={{ fontSize: 10.5, color: 'var(--muted-2)', alignSelf: 'center', marginRight: 2 }}>
+              {t('recent_searches_label')}
+            </span>
+            {recentSearches.map(q => (
+              <button
+                key={q}
+                type="button"
+                onMouseDown={e => e.preventDefault()}
+                onClick={() => handleSearch(q)}
+                style={{
+                  fontSize: 11, color: 'var(--muted)', background: 'var(--panel-2)',
+                  border: '1px solid var(--border-soft)', borderRadius: 999, padding: '5px 11px',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* 게임 + 언어판 */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
@@ -172,7 +312,7 @@ export function PriceSearch() {
 
         {/* 검색 버튼 */}
         <button
-          onClick={handleSearch}
+          onClick={() => handleSearch()}
           disabled={loading || !cardName.trim()}
           style={{
             width: '100%', padding: '11px', borderRadius: 9, fontSize: 14, fontWeight: 700,
@@ -194,6 +334,56 @@ export function PriceSearch() {
       {/* 결과 */}
       {searched && (
         <div>
+          {/* 관심목록(찜) + 알림 */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            background: 'var(--panel)', border: '1px solid var(--border-soft)',
+            borderRadius: 11, padding: '9px 12px', marginBottom: 12,
+          }}>
+            <button
+              type="button"
+              onClick={handleToggleWatch}
+              disabled={watchBusy}
+              aria-label={currentWatchItem ? t('aria_remove_watchlist') : t('aria_add_watchlist')}
+              style={{
+                width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+                border: `1px solid ${currentWatchItem ? 'rgba(255,80,101,.4)' : 'var(--border)'}`,
+                background: currentWatchItem ? 'var(--gain-soft)' : 'var(--panel-2)',
+                color: currentWatchItem ? 'var(--gain)' : 'var(--muted)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 15, cursor: watchBusy ? 'default' : 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              {currentWatchItem ? '♥' : '♡'}
+            </button>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {searchedCardName}{searchedCardNumber ? ` · ${searchedCardNumber}` : ''}
+              </div>
+              <div style={{ fontSize: 10.5, color: 'var(--muted-2)' }}>
+                {t(GAME_LABEL_KEYS[searchedGame] ?? 'game_other')}
+              </div>
+            </div>
+            {currentWatchItem && (
+              <button
+                type="button"
+                onClick={handleToggleAlert}
+                disabled={watchBusy}
+                aria-label={currentWatchItem.alert_enabled ? t('aria_alert_off') : t('aria_alert_on')}
+                style={{
+                  width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+                  border: `1px solid ${currentWatchItem.alert_enabled ? 'rgba(232,177,58,.4)' : 'var(--border)'}`,
+                  background: currentWatchItem.alert_enabled ? 'rgba(232,177,58,.14)' : 'var(--panel-2)',
+                  color: currentWatchItem.alert_enabled ? 'var(--accent)' : 'var(--muted-2)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 13, cursor: watchBusy ? 'default' : 'pointer', fontFamily: 'inherit',
+                }}
+              >
+                🔔
+              </button>
+            )}
+          </div>
+
           {/* 최저가 배너 */}
           {cheapestPrice != null && (
             <div style={{
@@ -314,6 +504,18 @@ export function PriceSearch() {
           <div style={{ fontSize: 32, marginBottom: 10 }}>🔎</div>
           <div style={{ fontWeight: 600 }}>{t('no_results')}</div>
           <div style={{ fontSize: 12.5, marginTop: 6 }}>{t('no_results_hint')}</div>
+        </div>
+      )}
+
+      {/* 토스트 — 관심목록·알림 처리 결과 */}
+      {toast && (
+        <div style={{
+          position: 'fixed', left: '50%', bottom: 24, transform: 'translateX(-50%)',
+          background: 'var(--panel-3)', border: '1px solid var(--border)', color: 'var(--text)',
+          borderRadius: 10, padding: '10px 16px', fontSize: 12.5, fontWeight: 600,
+          boxShadow: '0 8px 24px rgba(0,0,0,.35)', zIndex: 50,
+        }}>
+          {toast}
         </div>
       )}
     </div>
